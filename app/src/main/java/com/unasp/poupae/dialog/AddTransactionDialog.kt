@@ -81,11 +81,16 @@ class AddTransactionDialog : DialogFragment() {
                         .collection("transacoes")
                         .add(transacao)
                         .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Transação salva!", Toast.LENGTH_SHORT).show()
+                            view?.context?.let { ctx ->
+                                Toast.makeText(ctx, "Transação salva!", Toast.LENGTH_SHORT).show()
+                            }
                         }
                         .addOnFailureListener {
-                            Toast.makeText(requireContext(), "Erro ao salvar: ${it.message}", Toast.LENGTH_SHORT).show()
+                            view?.context?.let { ctx ->
+                                Toast.makeText(ctx, "Erro ao salvar: ${it.message}", Toast.LENGTH_SHORT).show()
+                            }
                         }
+
                 } else {
                     Toast.makeText(requireContext(), "Preencha os campos corretamente!", Toast.LENGTH_SHORT).show()
                 }
