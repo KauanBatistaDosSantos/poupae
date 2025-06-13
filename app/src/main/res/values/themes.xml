@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Poupae" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Poupae" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Aqui você pode personalizar seu tema -->
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryColor</item>
+        <item name="colorAccent">@color/linkColor</item>
+        <item name="android:windowBackground">@color/backgroundColor</item>
+    </style>
 </resources>
