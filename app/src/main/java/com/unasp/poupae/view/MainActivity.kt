@@ -1,4 +1,4 @@
-package com.unasp.poupae
+package com.unasp.poupae.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

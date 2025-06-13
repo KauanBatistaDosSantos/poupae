@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "277714198156",
+    "project_id": "poupae-55f25",
+    "storage_bucket": "poupae-55f25.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:277714198156:android:c5bb8a2c4482306b24a5a9",
+        "android_client_info": {
+          "package_name": "com.unasp.poupae"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_QQpWfKCzHEbm1bjuUNcbRWSyjyQAXUo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
