@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unasp.poupae.R
 import com.unasp.poupae.adapter.TransacaoAdapter
+import com.unasp.poupae.dialog.EditTransactionDialog
 import com.unasp.poupae.model.Transacao
 
 class ExtratoFragment : Fragment() {
@@ -30,8 +31,9 @@ class ExtratoFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerExtrato)
         recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = TransacaoAdapter(requireContext(), listaTransacoes) { id, transacao ->
-            Toast.makeText(requireContext(), "Editar: ${transacao.categoria}", Toast.LENGTH_SHORT).show()
-            // Aqui podemos abrir o diálogo para edição usando id + transacao
+            EditTransactionDialog(id, transacao) {
+                carregarTransacoes() // recarrega os dados após a edição
+            }.show(parentFragmentManager, "editDialog")
         }
         recyclerView.adapter = adapter
 
