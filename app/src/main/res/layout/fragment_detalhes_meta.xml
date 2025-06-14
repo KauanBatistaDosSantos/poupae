@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtDetalheNome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nome da Meta"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/txtDetalheValorAlvo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Valor Alvo: R$0,00"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/txtDetalheValorAtual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Valor Atual: R$0,00"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/txtDetalheDataLimite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Data Limite: --"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/txtDetalheDataCriacao"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Criada em: --"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp" />
+
+    </LinearLayout>
+</ScrollView>
