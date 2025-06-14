@@ -14,11 +14,11 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
-    <View
+    <com.github.mikephil.charting.charts.PieChart
         android:id="@+id/graficoPorCategoria"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="#DDDDDD"
+        android:layout_height="300dp"
         android:layout_marginBottom="16dp" />
+
 
 </LinearLayout>

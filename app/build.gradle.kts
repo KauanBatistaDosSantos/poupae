@@ -68,4 +68,5 @@ dependencies {
     implementation(libs.firebase.ui.auth)
     implementation(libs.play.services.auth)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.mpandroidchart)
 }
