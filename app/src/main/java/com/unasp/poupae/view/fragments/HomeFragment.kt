@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Legend
@@ -14,16 +15,79 @@ import com.github.mikephil.charting.data.PieEntry
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unasp.poupae.R
+import java.text.SimpleDateFormat
+import java.util.*
 
 class HomeFragment : Fragment() {
 
     private lateinit var pieChart: PieChart
+    private lateinit var tvSaldoAtual: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
         pieChart = view.findViewById(R.id.graficoPorCategoria)
-        carregarDadosDoFirestore()
+        tvSaldoAtual = view.findViewById(R.id.tvSaldoAtual)
+
+        aplicarTransacoesRecorrentes {
+            carregarDadosDoFirestore()
+        }
+
         return view
+    }
+
+    // Adicione esse trecho no seu HomeFragment.kt, logo antes de carregar as transações normais
+
+    private fun aplicarTransacoesRecorrentes(onComplete: () -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val hoje = Calendar.getInstance()
+        val diaAtual = hoje.get(Calendar.DAY_OF_MONTH)
+        val dataHojeFormatada = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(hoje.time)
+
+        db.collection("users").document(userId)
+            .collection("orcamento_recorrente")
+            .get()
+            .addOnSuccessListener { result ->
+                val transacoesParaSalvar = mutableListOf<Map<String, Any>>()
+
+                for (doc in result) {
+                    val categoria = doc.getString("categoria") ?: continue
+                    val descricao = doc.getString("descricao") ?: ""
+                    val tipo = doc.getString("tipo") ?: continue
+                    val valor = doc.getDouble("valor") ?: continue
+                    val diaRecorrente = doc.getLong("dia")?.toInt() ?: continue
+                    val ultimoRegistro = doc.getString("ultimoRegistro") ?: ""
+
+                    if (diaAtual == diaRecorrente && ultimoRegistro != dataHojeFormatada) {
+                        val novaTransacao = hashMapOf(
+                            "categoria" to categoria,
+                            "descricao" to descricao,
+                            "tipo" to tipo,
+                            "valor" to valor,
+                            "data" to dataHojeFormatada,
+                            "recorrente" to true
+                        )
+                        transacoesParaSalvar.add(novaTransacao)
+
+                        // Atualiza o campo ultimoRegistro
+                        db.collection("users").document(userId)
+                            .collection("orcamento_recorrente")
+                            .document(doc.id)
+                            .update("ultimoRegistro", dataHojeFormatada)
+                    }
+                }
+
+                // Salva as transações no histórico
+                val transacoesRef = db.collection("users").document(userId).collection("transacoes")
+                for (transacao in transacoesParaSalvar) {
+                    transacoesRef.add(transacao)
+                }
+
+                onComplete()
+            }
+            .addOnFailureListener {
+                onComplete() // continua mesmo com erro
+            }
     }
 
     private fun carregarDadosDoFirestore() {
@@ -35,6 +99,8 @@ class HomeFragment : Fragment() {
             .get()
             .addOnSuccessListener { result ->
                 val mapa = mutableMapOf<String, Double>()
+                var totalGastos = 0.0
+                var totalGanhos = 0.0
 
                 for (doc in result) {
                     val tipo = doc.getString("tipo")
@@ -43,8 +109,14 @@ class HomeFragment : Fragment() {
 
                     if (tipo == "despesa") {
                         mapa[categoria] = mapa.getOrDefault(categoria, 0.0) + valor
+                        totalGastos += valor
+                    } else if (tipo == "ganho") {
+                        totalGanhos += valor
                     }
                 }
+
+                val saldoAtual = totalGanhos - totalGastos
+                tvSaldoAtual.text = String.format("Saldo Atual: R$ %.2f", saldoAtual)
 
                 val total = mapa.values.sum()
                 val entradas = mapa.map { (categoria, valor) ->

@@ -6,5 +6,7 @@ data class Transacao(
     val valor: Double = 0.0,
     val descricao: String = "",
     val tipo: String = "",
-    val data: String = ""
+    val data: String = "",
+    val recorrente: Boolean = false, // NOVO
+    val frequencia: String? = null   // NOVO: ex "mensal", "semanal", etc
 )

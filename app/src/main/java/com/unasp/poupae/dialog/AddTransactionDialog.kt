@@ -8,6 +8,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unasp.poupae.R
 import java.text.SimpleDateFormat
@@ -15,7 +16,8 @@ import java.util.*
 
 class AddTransactionDialog : DialogFragment() {
 
-    private val categoriasPadrao = listOf("Alimentação", "Transporte", "Lazer", "Saúde", "Educação", "Moradia", "Outros")
+    private val categoriasDespesa = listOf("Alimentação", "Transporte", "Lazer", "Saúde", "Educação", "Moradia", "Outros")
+    private val categoriasGanho = listOf("Salário", "Freelancer", "Aluguel", "Venda", "Devolução", "Outros")
     private val categoriasPersonalizadas = mutableListOf<String>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -24,12 +26,21 @@ class AddTransactionDialog : DialogFragment() {
         val inputValor = view.findViewById<EditText>(R.id.inputValor)
         val inputDescricao = view.findViewById<EditText>(R.id.inputDescricao)
         val spinnerCategoria = view.findViewById<Spinner>(R.id.spinnerCategoria)
+        val spinnerTipo = view.findViewById<Spinner>(R.id.spinnerTipo)
+        val checkRecorrente = view.findViewById<CheckBox>(R.id.checkboxRecorrente)
 
         val db = FirebaseFirestore.getInstance()
         val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-        val categoriasCombinadas = categoriasPadrao.toMutableList()
+        // Setup tipo spinner
+        val tipoAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, listOf("Despesa", "Ganho"))
+        tipoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerTipo.adapter = tipoAdapter
 
+        val categoriasCombinadas = categoriasDespesa.toMutableList()
+        setupSpinner(spinnerCategoria, categoriasCombinadas)
+
+        // Atualiza categorias personalizadas do Firestore
         userId?.let { uid ->
             db.collection("users").document(uid)
                 .collection("categorias")
@@ -47,6 +58,22 @@ class AddTransactionDialog : DialogFragment() {
                 }
         }
 
+        // Trocar categorias conforme tipo selecionado
+        spinnerTipo.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val tipoSelecionado = parent?.getItemAtPosition(position).toString()
+                val listaBase = if (tipoSelecionado == "Despesa") categoriasDespesa else categoriasGanho
+                val novaLista = listaBase.toMutableList().apply {
+                    addAll(categoriasPersonalizadas.filterNot { contains(it) })
+                    add("+ Adicionar nova categoria")
+                }
+                setupSpinner(spinnerCategoria, novaLista)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Adicionar nova categoria
         spinnerCategoria.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val item = spinnerCategoria.selectedItem.toString()
@@ -65,6 +92,8 @@ class AddTransactionDialog : DialogFragment() {
                 val categoria = spinnerCategoria.selectedItem.toString()
                 val valor = inputValor.text.toString().toDoubleOrNull()
                 val descricao = inputDescricao.text.toString().trim()
+                val tipo = spinnerTipo.selectedItem.toString().lowercase(Locale.getDefault())
+                val recorrente = checkRecorrente.isChecked
 
                 if (categoria.isNotEmpty() && valor != null && userId != null) {
                     val dataFormatada = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
@@ -73,8 +102,9 @@ class AddTransactionDialog : DialogFragment() {
                         "categoria" to categoria,
                         "valor" to valor,
                         "descricao" to descricao,
-                        "tipo" to "despesa",
-                        "data" to dataFormatada
+                        "tipo" to tipo,
+                        "data" to dataFormatada,
+                        "recorrente" to recorrente
                     )
 
                     db.collection("users").document(userId)
@@ -84,15 +114,43 @@ class AddTransactionDialog : DialogFragment() {
                             view?.context?.let { ctx ->
                                 Toast.makeText(ctx, "Transação salva!", Toast.LENGTH_SHORT).show()
                             }
+
+                            // Se for recorrente, salva também no orçamento
+                            if (recorrente) {
+                                val orcamentoRef = db.collection("users").document(userId)
+                                    .collection("orcamento_recorrente")
+
+                                val recorrenteItem = hashMapOf(
+                                    "categoria" to categoria,
+                                    "valor" to valor,
+                                    "descricao" to descricao,
+                                    "tipo" to tipo,
+                                    "frequencia" to "mensal",
+                                    "criadoEm" to FieldValue.serverTimestamp()
+                                )
+
+                                orcamentoRef.add(recorrenteItem)
+                                    .addOnSuccessListener {
+                                        view?.context?.let { ctx ->
+                                            Toast.makeText(ctx, "Salvo como recorrente no orçamento!", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    .addOnFailureListener {
+                                        view?.context?.let { ctx ->
+                                            Toast.makeText(ctx, "Erro ao salvar no orçamento: ${it.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                            }
                         }
                         .addOnFailureListener {
                             view?.context?.let { ctx ->
                                 Toast.makeText(ctx, "Erro ao salvar: ${it.message}", Toast.LENGTH_SHORT).show()
                             }
                         }
-
                 } else {
-                    Toast.makeText(requireContext(), "Preencha os campos corretamente!", Toast.LENGTH_SHORT).show()
+                    view?.context?.let { ctx ->
+                        Toast.makeText(ctx, "Preencha os campos corretamente!", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             .setNegativeButton("Cancelar", null)
