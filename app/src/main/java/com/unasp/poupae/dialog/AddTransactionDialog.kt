@@ -155,15 +155,23 @@ class AddTransactionDialog : DialogFragment() {
             }
     }
 
-    private fun salvarTransacao(userId: String, categoria: String, valor: Double, descricao: String, tipo: String, recorrente: Boolean) {
+    private fun salvarTransacao(
+        userId: String,
+        categoria: String,
+        valor: Double,
+        descricao: String,
+        tipo: String,
+        recorrente: Boolean
+    ) {
         val db = FirebaseFirestore.getInstance()
-        val dataFormatada = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val dataTimestamp = com.google.firebase.Timestamp.now() // Agora com precisão total
+
         val transacao = hashMapOf(
             "categoria" to categoria,
             "valor" to valor,
             "descricao" to descricao,
             "tipo" to tipo,
-            "data" to dataFormatada,
+            "data" to dataTimestamp,
             "recorrente" to recorrente,
             "tipoMeta" to categoria.startsWith("[META]")
         )

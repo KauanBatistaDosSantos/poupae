@@ -68,13 +68,30 @@ class ExtratoFragment : Fragment() {
 
                 val ganhosPorMes = mutableMapOf<Int, Float>()
                 val despesasPorMes = mutableMapOf<Int, Float>()
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
                 for (doc in documentos) {
-                    val transacao = doc.toObject(Transacao::class.java)
+                    val transacao = try {
+                        doc.toObject(Transacao::class.java)
+                    } catch (e: Exception) {
+                        val dataString = doc.getString("data")
+                        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val parsedDate = try {
+                            dataString?.let { sdf.parse(it) }
+                        } catch (ex: Exception) {
+                            null
+                        }
+
+                        Transacao(
+                            categoria = doc.getString("categoria") ?: "",
+                            valor = doc.getDouble("valor") ?: 0.0,
+                            tipo = doc.getString("tipo") ?: "",
+                            data = parsedDate?.let { com.google.firebase.Timestamp(it) }
+                        )
+                    }
                     listaTransacoes.add(Pair(doc.id, transacao))
 
-                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    val data = sdf.parse(transacao.data)
+                    val data = transacao.data?.toDate() ?: continue
                     val calendar = Calendar.getInstance().apply { time = data }
                     val mes = calendar.get(Calendar.MONTH)
                     val valor = transacao.valor.toFloat()
@@ -85,6 +102,8 @@ class ExtratoFragment : Fragment() {
                         despesasPorMes[mes] = despesasPorMes.getOrDefault(mes, 0f) + valor
                     }
                 }
+
+                listaTransacoes.sortByDescending { it.second.data?.toDate() }
 
                 gerarGrafico(ganhosPorMes, despesasPorMes)
                 adapter.notifyDataSetChanged()

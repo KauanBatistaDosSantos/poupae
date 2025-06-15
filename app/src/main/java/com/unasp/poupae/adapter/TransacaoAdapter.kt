@@ -35,7 +35,9 @@ class TransacaoAdapter(
         val (id, transacao) = lista[position]
         holder.txtCategoria.text = transacao.categoria
         holder.txtValor.text = "R$ %.2f".format(transacao.valor)
-        holder.txtData.text = transacao.data
+        holder.txtData.text = transacao.data?.toDate()?.let {
+            java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
+        } ?: ""
 
         holder.itemView.setOnLongClickListener {
             AlertDialog.Builder(context)
@@ -49,6 +51,7 @@ class TransacaoAdapter(
             true
         }
     }
+
 
     override fun getItemCount(): Int = lista.size
 
