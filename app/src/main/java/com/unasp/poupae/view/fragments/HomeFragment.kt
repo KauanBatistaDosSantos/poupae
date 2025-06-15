@@ -107,8 +107,11 @@ class HomeFragment : Fragment() {
                     val categoria = doc.getString("categoria") ?: continue
                     val valor = doc.getDouble("valor") ?: continue
 
-                    if (tipo == "despesa") {
+                    if (tipo == "despesa" && !categoria.startsWith("[META")) {
                         mapa[categoria] = mapa.getOrDefault(categoria, 0.0) + valor
+                    }
+
+                    if (tipo == "despesa") {
                         totalGastos += valor
                     } else if (tipo == "ganho") {
                         totalGanhos += valor

@@ -50,5 +50,35 @@
             android:textSize="16sp"
             android:layout_marginBottom="12dp" />
 
+        <Button
+            android:id="@+id/btnEditarMeta"
+            android:text="Editar Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        
+        <Button
+            android:id="@+id/btnExcluirMeta"
+            android:text="Excluir Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btnAdicionarValor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Adicionar valor"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@color/primaryColor" />
+
+        <Button
+            android:id="@+id/btnRetirarValor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Retirar valor"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/black" />
+
+
+
     </LinearLayout>
 </ScrollView>

@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="16dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/edtNomeMeta"
+        android:hint="Nome da Meta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/edtValorAlvoMeta"
+        android:hint="Valor Alvo"
+        android:inputType="numberDecimal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/edtDataLimiteMeta"
+        android:hint="Data Limite (opcional)"
+        android:inputType="date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

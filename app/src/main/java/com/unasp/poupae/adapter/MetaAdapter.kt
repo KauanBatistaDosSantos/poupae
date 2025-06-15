@@ -57,12 +57,13 @@ class MetaAdapter(
         var alternandoData = false
         val handlerData = Handler(Looper.getMainLooper())
         holder.txtData.setOnClickListener {
-            if (meta.dataLimite != null && !alternandoData) {
+            val dataLimite = meta.dataLimite
+            if (dataLimite != null && !alternandoData) {
                 alternandoData = true
-                val diasRestantes = calcularDiasRestantes(meta.dataLimite)
+                val diasRestantes = calcularDiasRestantes(dataLimite)
                 holder.txtData.text = "$diasRestantes dias restantes"
                 handlerData.postDelayed({
-                    holder.txtData.text = meta.dataLimite
+                    holder.txtData.text = dataLimite
                     alternandoData = false
                 }, 30000)
             }

@@ -32,7 +32,6 @@ class AddTransactionDialog : DialogFragment() {
         val db = FirebaseFirestore.getInstance()
         val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-        // Setup tipo spinner
         val tipoAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, listOf("Despesa", "Ganho"))
         tipoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerTipo.adapter = tipoAdapter
@@ -40,7 +39,6 @@ class AddTransactionDialog : DialogFragment() {
         val categoriasCombinadas = categoriasDespesa.toMutableList()
         setupSpinner(spinnerCategoria, categoriasCombinadas)
 
-        // Atualiza categorias personalizadas do Firestore
         userId?.let { uid ->
             db.collection("users").document(uid)
                 .collection("categorias")
@@ -53,27 +51,52 @@ class AddTransactionDialog : DialogFragment() {
                             categoriasCombinadas.add(nome)
                         }
                     }
-                    categoriasCombinadas.add("+ Adicionar nova categoria")
-                    setupSpinner(spinnerCategoria, categoriasCombinadas)
+
+                    // Adiciona metas como categorias
+                    db.collection("users").document(uid)
+                        .collection("metas")
+                        .get()
+                        .addOnSuccessListener { metas ->
+                            for (doc in metas) {
+                                val nomeMeta = doc.getString("nome") ?: continue
+                                categoriasCombinadas.add("[META] $nomeMeta")
+                            }
+                            categoriasCombinadas.add("+ Adicionar nova categoria")
+                            setupSpinner(spinnerCategoria, categoriasCombinadas)
+                        }
                 }
         }
 
-        // Trocar categorias conforme tipo selecionado
         spinnerTipo.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val tipoSelecionado = parent?.getItemAtPosition(position).toString()
                 val listaBase = if (tipoSelecionado == "Despesa") categoriasDespesa else categoriasGanho
                 val novaLista = listaBase.toMutableList().apply {
                     addAll(categoriasPersonalizadas.filterNot { contains(it) })
-                    add("+ Adicionar nova categoria")
+                    if (tipoSelecionado == "Despesa") {
+                        userId?.let { uid ->
+                            db.collection("users").document(uid)
+                                .collection("metas")
+                                .get()
+                                .addOnSuccessListener { metas ->
+                                    for (doc in metas) {
+                                        val nomeMeta = doc.getString("nome") ?: continue
+                                        add("[META] $nomeMeta")
+                                    }
+                                    add("+ Adicionar nova categoria")
+                                    setupSpinner(spinnerCategoria, this)
+                                }
+                        }
+                    } else {
+                        add("+ Adicionar nova categoria")
+                        setupSpinner(spinnerCategoria, this)
+                    }
                 }
-                setupSpinner(spinnerCategoria, novaLista)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        // Adicionar nova categoria
         spinnerCategoria.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val item = spinnerCategoria.selectedItem.toString()
@@ -115,6 +138,23 @@ class AddTransactionDialog : DialogFragment() {
                                 Toast.makeText(ctx, "Transação salva!", Toast.LENGTH_SHORT).show()
                             }
 
+                            // Se categoria for de meta, atualiza valorAtual
+                            if (categoria.startsWith("[META] ")) {
+                                val nomeMeta = categoria.removePrefix("[META] ")
+                                db.collection("users").document(userId)
+                                    .collection("metas")
+                                    .whereEqualTo("nome", nomeMeta)
+                                    .get()
+                                    .addOnSuccessListener { result ->
+                                        if (!result.isEmpty) {
+                                            val docId = result.documents[0].id
+                                            db.collection("users").document(userId)
+                                                .collection("metas").document(docId)
+                                                .update("valorAtual", FieldValue.increment(valor))
+                                        }
+                                    }
+                            }
+
                             // Se for recorrente, salva também no orçamento
                             if (recorrente) {
                                 val orcamentoRef = db.collection("users").document(userId)
@@ -133,11 +173,6 @@ class AddTransactionDialog : DialogFragment() {
                                     .addOnSuccessListener {
                                         view?.context?.let { ctx ->
                                             Toast.makeText(ctx, "Salvo como recorrente no orçamento!", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                    .addOnFailureListener {
-                                        view?.context?.let { ctx ->
-                                            Toast.makeText(ctx, "Erro ao salvar no orçamento: ${it.message}", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                             }
