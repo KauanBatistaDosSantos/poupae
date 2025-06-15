@@ -36,8 +36,12 @@ class AddTransactionDialog : DialogFragment() {
         tipoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerTipo.adapter = tipoAdapter
 
-        val categoriasCombinadas = categoriasDespesa.toMutableList()
+        val categoriasCombinadas = mutableListOf<String>()
+        categoriasCombinadas.add("Selecione uma categoria")
+        categoriasCombinadas.addAll(categoriasDespesa)
+        categoriasCombinadas.add("+ Adicionar nova categoria")
         setupSpinner(spinnerCategoria, categoriasCombinadas)
+
 
         userId?.let { uid ->
             db.collection("users").document(uid)
@@ -59,11 +63,14 @@ class AddTransactionDialog : DialogFragment() {
                         .addOnSuccessListener { metas ->
                             for (doc in metas) {
                                 val nomeMeta = doc.getString("nome") ?: continue
-                                categoriasCombinadas.add("[META] $nomeMeta")
+                                val nomeCompleto = "[META] $nomeMeta"
+                                if (!categoriasCombinadas.contains(nomeCompleto)) {
+                                    categoriasCombinadas.add(categoriasCombinadas.size - 1, nomeCompleto) // adiciona antes de "+ Adicionar nova categoria"
+                                }
                             }
-                            categoriasCombinadas.add("+ Adicionar nova categoria")
                             setupSpinner(spinnerCategoria, categoriasCombinadas)
                         }
+
                 }
         }
 
@@ -71,30 +78,36 @@ class AddTransactionDialog : DialogFragment() {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val tipoSelecionado = parent?.getItemAtPosition(position).toString()
                 val listaBase = if (tipoSelecionado == "Despesa") categoriasDespesa else categoriasGanho
-                val novaLista = listaBase.toMutableList().apply {
-                    addAll(categoriasPersonalizadas.filterNot { contains(it) })
-                    if (tipoSelecionado == "Despesa") {
-                        userId?.let { uid ->
-                            db.collection("users").document(uid)
-                                .collection("metas")
-                                .get()
-                                .addOnSuccessListener { metas ->
-                                    for (doc in metas) {
-                                        val nomeMeta = doc.getString("nome") ?: continue
-                                        add("[META] $nomeMeta")
+                val novaLista = mutableListOf<String>()
+                novaLista.add("Selecione uma categoria")
+                novaLista.addAll(listaBase)
+                novaLista.addAll(categoriasPersonalizadas.filterNot { novaLista.contains(it) })
+                if (tipoSelecionado == "Despesa") {
+                    userId?.let { uid ->
+                        db.collection("users").document(uid)
+                            .collection("metas")
+                            .get()
+                            .addOnSuccessListener { metas ->
+                                for (doc in metas) {
+                                    val nomeMeta = doc.getString("nome") ?: continue
+                                    val nomeCompleto = "[META] $nomeMeta"
+                                    if (!novaLista.contains(nomeCompleto)) {
+                                        novaLista.add(novaLista.size, nomeCompleto)
                                     }
-                                    add("+ Adicionar nova categoria")
-                                    setupSpinner(spinnerCategoria, this)
                                 }
-                        }
-                    } else {
-                        add("+ Adicionar nova categoria")
-                        setupSpinner(spinnerCategoria, this)
+                                novaLista.add("+ Adicionar nova categoria")
+                                setupSpinner(spinnerCategoria, novaLista)
+                            }
                     }
+                } else {
+                    novaLista.add("+ Adicionar nova categoria")
+                    setupSpinner(spinnerCategoria, novaLista)
                 }
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Não faz nada, mas precisa estar implementado
+            }
         }
 
         spinnerCategoria.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -118,7 +131,7 @@ class AddTransactionDialog : DialogFragment() {
                 val tipo = spinnerTipo.selectedItem.toString().lowercase(Locale.getDefault())
                 val recorrente = checkRecorrente.isChecked
 
-                if (categoria.isNotEmpty() && valor != null && userId != null) {
+                if (valor != null && userId != null && categoria != "Selecione uma categoria" && categoria != "+ Adicionar nova categoria") {
                     val dataFormatada = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
                     val transacao = hashMapOf(
@@ -188,7 +201,9 @@ class AddTransactionDialog : DialogFragment() {
                     }
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton("Cancelar") { _, _ ->
+                spinnerCategoria.setSelection(0) // ✅ referência correta ao spinner
+            }
             .create()
     }
 
@@ -219,9 +234,13 @@ class AddTransactionDialog : DialogFragment() {
                             (spinner.adapter as ArrayAdapter<String>).insert(novaCategoria, spinner.adapter.count - 1)
                             spinner.setSelection(spinner.adapter.count - 2)
                         }
+                } else {
+                    spinner.setSelection(0) // volta para "Selecione uma categoria" se salvar vazio
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton("Cancelar") { _, _ ->
+                spinner.setSelection(0) // ✅ volta ao item padrão ao cancelar
+            }
             .show()
     }
 }
