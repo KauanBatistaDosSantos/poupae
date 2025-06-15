@@ -53,21 +53,40 @@ class TransacaoAdapter(
     override fun getItemCount(): Int = lista.size
 
     private fun excluirTransacao(id: String, position: Int) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        FirebaseFirestore.getInstance()
-            .collection("users").document(uid)
-            .collection("transacoes").document(id)
-            .delete()
-            .addOnSuccessListener {
-                lista.removeAt(position)
-                notifyItemRemoved(position)
-                Toast.makeText(context, "Transação excluída", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(context, "Erro ao excluir: ${it.message}", Toast.LENGTH_SHORT).show()
+        db.collection("users").document(userId)
+            .collection("transacoes")
+            .document(id)
+            .get()
+            .addOnSuccessListener { doc ->
+                val fazParteMeta = doc.getBoolean("tipoMeta") == true
+                if (fazParteMeta) {
+                    Toast.makeText(
+                        context,
+                        "Essa transação pertence a uma meta. Exclua a meta para removê-la.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    db.collection("users").document(userId)
+                        .collection("transacoes")
+                        .document(id)
+                        .delete()
+                        .addOnSuccessListener {
+                            Toast.makeText(
+                                context,
+                                "Transação excluída com sucesso!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            lista.removeAt(position)
+                            notifyItemRemoved(position)
+                        }
+                }
             }
     }
+
+
 
     fun atualizarLista(novaLista: List<Pair<String, Transacao>>) {
         lista.clear()

@@ -20,7 +20,7 @@
 
         <!-- Ganhos -->
         <TextView
-            android:text="Ganhos Mensais"
+            android:text="Ganhos Recorrentes"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
 
         <!-- Despesas -->
         <TextView
-            android:text="Despesas Mensais"
+            android:text="Gastos Recorrentes"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_width="wrap_content"
@@ -46,15 +46,55 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Saldo Final -->
+        <!-- Saldos -->
         <TextView
-            android:id="@+id/textSaldoFinal"
-            android:text="Saldo Mensal: R$ 0,00"
+            android:text="Saldos"
             android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_marginTop="24dp"
-            android:layout_gravity="center_horizontal"
+            android:textSize="16sp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:id="@+id/textSaldoRecorrente"
+            android:text="Saldo Recorrente: R$ 0,00"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/textSaldoReal"
+            android:text="Saldo Real: R$ 0,00"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <!-- Orçamento por categoria -->
+        <TextView
+            android:text="Orçamento por Categoria"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp" />
+
+        <!-- Botão para adicionar novo orçamento por categoria -->
+        <Button
+            android:id="@+id/btnAdicionarOrcamentoCategoria"
+            android:text="Definir orçamento por categoria"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <!-- Lista de orçamentos por categoria definidos -->
+        <LinearLayout
+            android:id="@+id/layoutPorCategoria"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
     </LinearLayout>
 </ScrollView>

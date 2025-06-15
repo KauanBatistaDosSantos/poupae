@@ -136,32 +136,37 @@ class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
         val db = FirebaseFirestore.getInstance()
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        // Registra o valor da meta como um ganho de volta ao saldo
         val data = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val ganho = hashMapOf(
-            "categoria" to "[META REMOVIDA] ${meta.nome}",
-            "valor" to meta.valorAtual,
-            "descricao" to "Meta removida e valor devolvido ao saldo",
-            "tipo" to "ganho",
-            "data" to data,
-            "recorrente" to false
-        )
+        val categoriaMeta = "[META] ${meta.nome}"
 
+        // Primeiro: excluir todas as transações associadas à meta
         db.collection("users").document(userId)
             .collection("transacoes")
-            .add(ganho)
-            .addOnSuccessListener {
-                // Depois de registrar o ganho, exclui a meta
-                db.collection("users").document(userId)
+            .whereEqualTo("categoria", categoriaMeta)
+            .whereEqualTo("tipoMeta", true)
+            .get()
+            .addOnSuccessListener { transacoesDocs ->
+                val batch = db.batch()
+                for (doc in transacoesDocs) {
+                    batch.delete(doc.reference)
+                }
+                // Exclui o documento da meta
+                val metaRef = db.collection("users").document(userId)
                     .collection("metas").document(meta.id)
-                    .delete()
+                batch.delete(metaRef)
+
+                // Commita todas as ações
+                batch.commit()
                     .addOnSuccessListener {
-                        Toast.makeText(requireContext(), "Meta excluída com sucesso!", Toast.LENGTH_SHORT).show()
-                        parentFragmentManager.popBackStack() // volta pra tela anterior
+                        Toast.makeText(requireContext(), "Meta e registros excluídos com sucesso!", Toast.LENGTH_SHORT).show()
+                        parentFragmentManager.popBackStack()
                     }
                     .addOnFailureListener {
-                        Toast.makeText(requireContext(), "Erro ao excluir meta: ${it.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Erro ao excluir registros da meta: ${it.message}", Toast.LENGTH_SHORT).show()
                     }
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Erro ao buscar registros da meta: ${it.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

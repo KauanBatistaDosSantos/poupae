@@ -64,7 +64,7 @@ class HomeFragment : Fragment() {
                             "descricao" to descricao,
                             "tipo" to tipo,
                             "valor" to valor,
-                            "data" to dataHojeFormatada,
+                            "data" to hoje.time, // salva como Timestamp do Firestore
                             "recorrente" to true
                         )
                         transacoesParaSalvar.add(novaTransacao)
