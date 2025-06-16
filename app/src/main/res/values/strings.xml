@@ -3,4 +3,10 @@
     <string name="default_web_client_id">SUA_CLIENT_ID_DO_FIREBASE_AQUI.apps.googleusercontent.com</string>
     <string name="navigation_drawer_open">Abrir menu</string>
     <string name="navigation_drawer_close">Fechar menu</string>
+    <string name="menu_config">Configurações</string>
+    <string name="menu_logout">Sair</string>
+    <string name="menu_home">Início</string>
+    <string name="menu_extrato">Extrato</string>
+    <string name="menu_metas">Metas</string>
+    <string name="menu_orcamento">Orçamento</string>
 </resources>

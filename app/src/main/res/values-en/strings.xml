@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Poupaê</string>
+    <string name="menu_config">Settings</string>
+    <string name="menu_logout">Logout</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_extrato">Extract</string>
+    <string name="menu_metas">Goals</string>
+    <string name="menu_orcamento">Budget</string>
+    <string name="navigation_drawer_open">Open menu</string>
+    <string name="navigation_drawer_close">Close menu</string>
+</resources>

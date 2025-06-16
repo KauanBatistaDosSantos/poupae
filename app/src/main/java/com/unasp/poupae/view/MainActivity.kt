@@ -13,6 +13,7 @@ import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import androidx.appcompat.widget.Toolbar
 import com.unasp.poupae.dialog.AddTransactionDialog
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import com.unasp.poupae.view.fragments.*
@@ -47,8 +48,17 @@ class MainActivity : AppCompatActivity() {
         navView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_config -> {
-                    Toast.makeText(this, "Abrir configurações", Toast.LENGTH_SHORT).show()
-                    // abrir tela de configurações futuramente
+                    val idiomas = arrayOf("Português", "Inglês", "Espanhol")
+                    val codigos = arrayOf("pt", "en", "es")
+
+                    AlertDialog.Builder(this)
+                        .setTitle("Escolha o idioma")
+                        .setItems(idiomas) { _, which ->
+                            val language = codigos[which]
+                            setAppLocale(this, language)
+                            recreate() // reinicia a activity para aplicar o idioma
+                        }
+                        .show()
                     true
                 }
                 R.id.nav_logout -> {

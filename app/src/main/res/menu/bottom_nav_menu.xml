@@ -4,12 +4,12 @@
     <item
         android:id="@+id/menu_home"
         android:icon="@drawable/home"
-        android:title="Início" />
+        android:title="@string/menu_home" />
 
     <item
         android:id="@+id/menu_extrato"
         android:icon="@drawable/graph"
-        android:title="Extrato" />
+        android:title="@string/menu_extrato" />
 
     <item
         android:id="@+id/menu_add"
@@ -19,10 +19,10 @@
     <item
         android:id="@+id/menu_metas"
         android:icon="@drawable/saving"
-        android:title="Metas" />
+        android:title="@string/menu_metas" />
 
     <item
         android:id="@+id/menu_orcamento"
         android:icon="@drawable/money"
-        android:title="Orçamento" />
+        android:title="@string/menu_orcamento" />
 </menu>
