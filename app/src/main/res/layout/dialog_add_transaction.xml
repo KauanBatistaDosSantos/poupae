@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tipo da transação" />
+        android:text="@string/tipo_transacao" />
 
     <Spinner
         android:id="@+id/spinnerTipo"
@@ -25,7 +25,7 @@
         android:id="@+id/inputValor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Valor"
+        android:hint="@string/valor"
         android:inputType="numberDecimal"
         android:layout_marginTop="12dp" />
 
@@ -33,14 +33,14 @@
         android:id="@+id/inputDescricao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Descrição (opcional)"
+        android:hint="@string/descricao_opcional"
         android:layout_marginTop="8dp" />
 
     <CheckBox
         android:id="@+id/checkboxRecorrente"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Marcar como recorrente"
+        android:text="@string/marcar_recorrente"
         android:layout_marginTop="12dp" />
 
 </LinearLayout>

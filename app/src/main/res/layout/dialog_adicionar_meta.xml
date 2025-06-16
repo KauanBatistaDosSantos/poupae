@@ -10,14 +10,14 @@
         android:id="@+id/etNomeMeta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nome da meta"
+        android:hint="@string/nome_meta"
         android:inputType="text" />
 
     <EditText
         android:id="@+id/etValorAlvoMeta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Valor alvo (ex: 1000.00)"
+        android:hint="@string/valor_alvo"
         android:inputType="numberDecimal"
         android:layout_marginTop="12dp" />
 
@@ -25,7 +25,7 @@
         android:id="@+id/etDataLimiteMeta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Data limite (dd/MM/yyyy) - opcional"
+        android:hint="@string/data_limite"
         android:inputType="date"
         android:layout_marginTop="12dp" />
 

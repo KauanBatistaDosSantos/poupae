@@ -7,7 +7,6 @@
     android:background="@color/verde_fundo"
     android:paddingBottom="16dp">
 
-    <!-- Seção do gráfico com fundo azul -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="260dp"
@@ -15,14 +14,12 @@
         android:background="@color/azul_royal"
         android:padding="12dp">
 
-        <!-- Gráfico centralizado -->
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/barChart"
             android:layout_width="match_parent"
             android:layout_height="180dp"
             android:layout_gravity="center" />
 
-        <!-- Legenda -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -40,12 +37,12 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_marginEnd="4dp"
-                    android:background="#66FF99" /> <!-- Acrescentado -->
+                    android:background="#66FF99" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Entradas"
+                    android:text="@string/entradas"
                     android:textColor="@android:color/white"
                     android:textSize="14sp"/>
             </LinearLayout>
@@ -59,19 +56,18 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_marginEnd="4dp"
-                    android:background="#FFEB3B" /> <!-- Retirado -->
+                    android:background="#FFEB3B" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Saídas"
+                    android:text="@string/saidas"
                     android:textColor="@android:color/white"
                     android:textSize="14sp"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Cartela branca com lista -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"

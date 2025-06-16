@@ -16,27 +16,24 @@
         android:padding="16dp"
         android:background="@android:color/white">
 
-        <!-- Nome da meta -->
         <TextView
             android:id="@+id/tvMetaNome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Carro"
+            android:text="@string/meta_generica"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@android:color/black" />
 
-        <!-- Data limite -->
         <TextView
             android:id="@+id/tvDataLimite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="31/10/2026"
+            android:text="@string/formato_data"
             android:textSize="14sp"
             android:layout_marginTop="2dp"
             android:textColor="@android:color/darker_gray" />
 
-        <!-- Progresso -->
         <LinearLayout
             android:id="@+id/layoutProgresso"
             android:layout_width="match_parent"
@@ -60,10 +57,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="45%"
+                android:text="@string/progresso_zero"
                 android:textSize="14sp"
                 android:textColor="@android:color/black" />
         </LinearLayout>
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>

@@ -11,14 +11,14 @@
         android:layout_width="3000dp"
         android:layout_height="300dp"
         android:src="@drawable/poupae"
-        android:contentDescription="Logo"
+        android:contentDescription="@string/logo"
         android:layout_marginBottom="24dp" />
 
     <EditText
         android:id="@+id/emailEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"
+        android:hint="@string/email"
         android:drawablePadding="8dp"
         android:inputType="textEmailAddress"
         android:drawableStart="@drawable/mail2"
@@ -29,7 +29,7 @@
         android:id="@+id/passwordEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Senha"
+        android:hint="@string/senha"
         android:drawablePadding="8dp"
         android:inputType="textPassword"
         android:drawableStart="@drawable/lock2"
@@ -40,7 +40,7 @@
         android:id="@+id/loginButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Entrar"
+        android:text="@string/entrar"
         android:backgroundTint="@color/azul_royal"
         android:textColor="@android:color/white"
         android:layout_marginBottom="1dp"/>
@@ -50,7 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/azul_royal"
-        android:text="Entrar com Google"
+        android:text="@string/google"
         android:layout_marginBottom="16dp"
         />
 
@@ -58,7 +58,7 @@
         android:id="@+id/registerText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ainda não tem conta? Cadastre-se"
+        android:text="@string/sem_conta"
         android:textColor="@color/linkColor"/>
 
 </LinearLayout>

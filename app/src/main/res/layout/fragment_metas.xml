@@ -18,7 +18,7 @@
             android:layout_height="90dp"
             android:gravity="center_horizontal"
             android:paddingTop="10dp"
-            android:text="Metas"
+            android:text="@string/menu_metas"
             android:textSize="22sp"
             android:textStyle="bold"
             android:background="@color/azul_royal"
@@ -26,8 +26,6 @@
             android:layout_marginBottom="12dp" />
     </LinearLayout>
 
-
-    <!-- Card com RecyclerView -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -47,12 +45,11 @@
         android:clipToPadding="false" />
     </androidx.cardview.widget.CardView>
 
-    <!-- Botão adicionar -->
     <Button
         android:id="@+id/btnAdicionarMeta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Adicionar Meta"
+        android:text="@string/adicionar_meta"
         android:textAllCaps="false"
         android:backgroundTint="@color/azul_royal"
         android:layout_margin="16dp"

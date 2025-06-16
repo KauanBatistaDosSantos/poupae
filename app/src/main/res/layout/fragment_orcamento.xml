@@ -11,20 +11,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Título -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Orçamento"
+            android:text="@string/menu_orcamento"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@android:color/black"
             android:layout_marginBottom="12dp" />
 
-        <!-- Ganhos Recorrentes -->
         <TextView
-            android:text="Ganhos Recorrentes"
+            android:text="@string/ganhos_recorrentes"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_width="match_parent"
@@ -42,9 +40,8 @@
             android:layout_marginBottom="12dp"
             android:elevation="2dp" />
 
-        <!-- Gastos Recorrentes -->
         <TextView
-            android:text="Gastos Recorrentes"
+            android:text="@string/gastos_recorrentes"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_width="match_parent"
@@ -62,9 +59,8 @@
             android:layout_marginBottom="12dp"
             android:elevation="2dp" />
 
-        <!-- Saldos -->
         <TextView
-            android:text="Saldos"
+            android:text="@string/saldos"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_width="match_parent"
@@ -73,7 +69,7 @@
 
         <TextView
             android:id="@+id/textSaldoRecorrente"
-            android:text="Saldo Recorrente: R$ 0,00"
+            android:text="@string/saldo_recorrente"
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -81,22 +77,20 @@
 
         <TextView
             android:id="@+id/textSaldoReal"
-            android:text="Saldo Real: R$ 0,00"
+            android:text="@string/saldo_real"
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp" />
 
-        <!-- Orçamento por categoria -->
         <TextView
-            android:text="Orçamento por Categoria"
+            android:text="@string/orcamento_por_categoria"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp" />
 
-        <!-- Lista de categorias -->
         <LinearLayout
             android:id="@+id/layoutPorCategoria"
             android:orientation="vertical"
@@ -104,10 +98,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp" />
 
-        <!-- Botão para adicionar novo orçamento por categoria -->
         <Button
             android:id="@+id/btnAdicionarOrcamentoCategoria"
-            android:text="Definir orçamento por categoria"
+            android:text="@string/definir_orcamento_categoria"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"

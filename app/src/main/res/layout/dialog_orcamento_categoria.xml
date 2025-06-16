@@ -13,7 +13,7 @@
 
     <EditText
         android:id="@+id/editValor"
-        android:hint="Valor limite (ex: 250.00)"
+        android:hint="@string/valor_limite"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="numberDecimal"

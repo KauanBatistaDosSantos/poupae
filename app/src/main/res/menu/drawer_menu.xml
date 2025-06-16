@@ -2,9 +2,9 @@
     <item
         android:id="@+id/nav_config"
         android:icon="@drawable/settings"
-        android:title="Configurações" />
+        android:title="@string/configuracoes" />
     <item
         android:id="@+id/nav_logout"
         android:icon="@drawable/logout"
-        android:title="Sair" />
+        android:title="@string/sair" />
 </menu>

@@ -13,7 +13,7 @@
             android:id="@+id/txtDetalheNome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nome da Meta"
+            android:text="@string/nome_meta_detalhe"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
@@ -22,7 +22,7 @@
             android:id="@+id/txtDetalheValorAlvo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Valor Alvo: R$0,00"
+            android:text="@string/valor_alvo_detalhe"
             android:textSize="16sp"
             android:layout_marginBottom="12dp" />
 
@@ -30,7 +30,7 @@
             android:id="@+id/txtDetalheValorAtual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Valor Atual: R$0,00"
+            android:text="@string/valor_alvo_detalhe"
             android:textSize="16sp"
             android:layout_marginBottom="12dp" />
 
@@ -38,7 +38,7 @@
             android:id="@+id/txtDetalheDataLimite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Data Limite: --"
+            android:text="@string/data_limite_detalhe"
             android:textSize="16sp"
             android:layout_marginBottom="12dp" />
 
@@ -46,19 +46,19 @@
             android:id="@+id/txtDetalheDataCriacao"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Criada em: --"
+            android:text="@string/criada_em_detalhe"
             android:textSize="16sp"
             android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnEditarMeta"
-            android:text="Editar Meta"
+            android:text="@string/editar_meta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         
         <Button
             android:id="@+id/btnExcluirMeta"
-            android:text="Excluir Meta"
+            android:text="@string/excluir_meta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -66,7 +66,7 @@
             android:id="@+id/btnAdicionarValor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Adicionar valor"
+            android:text="@string/adicionar_valor"
             android:layout_marginTop="24dp"
             android:backgroundTint="@color/primaryColor" />
 
@@ -74,11 +74,8 @@
             android:id="@+id/btnRetirarValor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Retirar valor"
+            android:text="@string/retirar_valor"
             android:layout_marginTop="12dp"
             android:backgroundTint="@color/black" />
-
-
-
     </LinearLayout>
 </ScrollView>

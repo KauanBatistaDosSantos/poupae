@@ -6,20 +6,20 @@
 
     <EditText
         android:id="@+id/edtNomeMeta"
-        android:hint="Nome da Meta"
+        android:hint="@string/nome_meta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/edtValorAlvoMeta"
-        android:hint="Valor Alvo"
+        android:hint="@string/valor_alvo"
         android:inputType="numberDecimal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/edtDataLimiteMeta"
-        android:hint="Data Limite (opcional)"
+        android:hint="@string/data_limite"
         android:inputType="date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

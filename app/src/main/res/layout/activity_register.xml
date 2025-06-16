@@ -10,18 +10,18 @@
         android:id="@+id/emailEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email" />
+        android:hint="@string/email" />
 
     <EditText
         android:id="@+id/passwordEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Senha"
+        android:hint="@string/senha"
         android:inputType="textPassword" />
 
     <Button
         android:id="@+id/registerButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Criar Conta" />
+        android:text="@string/criar_conta" />
 </LinearLayout>
