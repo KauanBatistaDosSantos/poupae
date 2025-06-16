@@ -35,7 +35,7 @@ class OrcamentoFragment : Fragment() {
         textSaldoRecorrente = view.findViewById(R.id.textSaldoRecorrente)
         textSaldoReal = view.findViewById(R.id.textSaldoReal)
         btnAdicionarOrcamento = Button(requireContext()).apply {
-            text = "Definir orçamento por categoria"
+            text = getString(R.string.definir_orcamento_categoria)
             setOnClickListener { mostrarDialogoOrcamento() }
         }
 
@@ -53,58 +53,72 @@ class OrcamentoFragment : Fragment() {
     }
 
     private fun mostrarDialogoOrcamento() {
-        val layout = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(50, 20, 50, 10)
-        }
-
-        val inputCategoria = EditText(requireContext()).apply {
-            hint = "Categoria"
-        }
-        val inputValor = EditText(requireContext()).apply {
-            hint = "Valor em R$"
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-        }
-
-        layout.addView(inputCategoria)
-        layout.addView(inputValor)
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Novo orçamento por categoria")
-            .setView(layout)
-            .setPositiveButton("Salvar") { _, _ ->
-                val categoria = inputCategoria.text.toString().trim()
-                val valor = inputValor.text.toString().toDoubleOrNull() ?: 0.0
-
-                if (categoria.isNotEmpty() && userId != null) {
-                    val orcamentoData = hashMapOf(
-                        "categoria" to categoria,
-                        "valorLimite" to valor
-                    )
-                    db.collection("users").document(userId)
-                        .collection("orcamento_categoria")
-                        .document(categoria)
-                        .set(orcamentoData)
-                        .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Orçamento salvo!", Toast.LENGTH_SHORT).show()
-                            carregarOrcamento()
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(requireContext(), "Erro ao salvar orçamento.", Toast.LENGTH_SHORT).show()
-                        }
-                }
+        context?.let { ctx ->
+            val layout = LinearLayout(ctx).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(50, 20, 50, 10)
             }
-            .setNegativeButton("Cancelar", null)
-            .show()
+
+            val inputCategoria = EditText(ctx).apply {
+                hint = getString(R.string.hint_categoria)
+            }
+            val inputValor = EditText(ctx).apply {
+                hint = getString(R.string.hint_valor)
+                inputType =
+                    android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+            }
+
+            layout.addView(inputCategoria)
+            layout.addView(inputValor)
+
+            AlertDialog.Builder(ctx)
+                .setTitle(getString(R.string.titulo_novo_orcamento_categoria))
+                .setView(layout)
+                .setPositiveButton(getString(R.string.salvar)) { _, _ ->
+                    val categoria = inputCategoria.text.toString().trim()
+                    val valor = inputValor.text.toString().toDoubleOrNull() ?: 0.0
+
+                    if (categoria.isNotEmpty() && userId != null) {
+                        val orcamentoData = hashMapOf(
+                            "categoria" to categoria,
+                            "valorLimite" to valor
+                        )
+                        db.collection("users").document(userId)
+                            .collection("orcamento_categoria")
+                            .document(categoria)
+                            .set(orcamentoData)
+                            .addOnSuccessListener {
+                                Toast.makeText(
+                                    ctx,
+                                    getString(R.string.orcamento_salvo),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                carregarOrcamento()
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(
+                                    ctx,
+                                    getString(R.string.erro_salvar_orcamento),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                    }
+                }
+                .setNegativeButton(getString(R.string.cancelar), null)
+                .show()
+        }
     }
 
     private fun carregarOrcamento() {
-        if (userId == null) return
+        if (userId == null || !isAdded || context == null) return
 
         db.collection("users").document(userId)
             .collection("orcamento_recorrente")
             .get()
             .addOnSuccessListener { docs ->
+                if (!isAdded || context == null) return@addOnSuccessListener
+                val ctx = requireContext()
+
                 var totalGanhos = 0.0
                 var totalDespesas = 0.0
                 val mapaPorCategoria = mutableMapOf<String, Double>()
@@ -117,11 +131,12 @@ class OrcamentoFragment : Fragment() {
                 for (doc in docs) {
                     val tipo = doc.getString("tipo") ?: continue
                     val valor = doc.getDouble("valor") ?: 0.0
-                    val categoria = doc.getString("categoria") ?: "Categoria"
+                    val categoria = doc.getString("categoria") ?: ctx.getString(R.string.hint_categoria)
                     val descricao = doc.getString("descricao") ?: ""
 
-                    val itemView = TextView(requireContext())
-                    itemView.text = "$categoria - R$ %.2f".format(valor) + if (descricao.isNotBlank()) " ($descricao)" else ""
+                    val itemView = TextView(ctx)
+                    itemView.text = "$categoria - R$ %.2f".format(valor) +
+                            if (descricao.isNotBlank()) " ($descricao)" else ""
                     itemView.textSize = 14f
 
                     mapaPorCategoria[categoria] = mapaPorCategoria.getOrDefault(categoria, 0.0) + valor
@@ -136,16 +151,20 @@ class OrcamentoFragment : Fragment() {
                 }
 
                 val saldoRecorrente = totalGanhos - totalDespesas
-                textSaldoRecorrente.text = "Saldo Recorrente: R$ %.2f".format(saldoRecorrente)
+                textSaldoRecorrente.text = ctx.getString(R.string.saldo_recorrente, saldoRecorrente)
 
                 calcularSaldoReal(saldoRecorrente, mapaPorCategoria)
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Erro ao carregar orçamento: ${it.message}", Toast.LENGTH_SHORT).show()
+                if (!isAdded || context == null) return@addOnFailureListener
+                Toast.makeText(requireContext(), getString(R.string.erro_carregar_orcamento, it.message ?: ""), Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun calcularSaldoReal(saldoRecorrente: Double, mapaPorCategoria: Map<String, Double>) {
+        if (!isAdded || context == null || userId == null) return
+        val ctx = requireContext()
+
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_MONTH, 1)
         calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -154,19 +173,20 @@ class OrcamentoFragment : Fragment() {
         calendar.set(Calendar.MILLISECOND, 0)
         val dataInicioMes = calendar.time
 
-        db.collection("users").document(userId!!)
+        db.collection("users").document(userId)
             .collection("transacoes")
-            .whereGreaterThanOrEqualTo("data", com.google.firebase.Timestamp(dataInicioMes))
+            .whereGreaterThanOrEqualTo("data", Timestamp(dataInicioMes))
             .get()
-
             .addOnSuccessListener { transacoes ->
+                if (!isAdded || context == null) return@addOnSuccessListener
+
                 var saldoReal = saldoRecorrente
                 val gastosPorCategoria = mutableMapOf<String, Double>()
 
                 for (transacao in transacoes) {
                     val tipo = transacao.getString("tipo") ?: continue
                     val valor = transacao.getDouble("valor") ?: continue
-                    val categoria = transacao.getString("categoria") ?: "Outros"
+                    val categoria = transacao.getString("categoria") ?: ctx.getString(R.string.categoria)
 
                     if (tipo == "despesa") {
                         saldoReal -= valor
@@ -174,14 +194,16 @@ class OrcamentoFragment : Fragment() {
                     }
                 }
 
-                textSaldoReal.text = "Saldo Real: R$ %.2f".format(saldoReal)
+                textSaldoReal.text = ctx.getString(R.string.saldo_real, saldoReal)
 
-                db.collection("users").document(userId!!)
+                db.collection("users").document(userId)
                     .collection("orcamento_categoria")
                     .get()
                     .addOnSuccessListener { orcamentosCategoria ->
-                        layoutPorCategoria.addView(TextView(requireContext()).apply {
-                            text = "\n-- Acompanhamento do orçamento por categoria --"
+                        if (!isAdded || context == null) return@addOnSuccessListener
+
+                        layoutPorCategoria.addView(TextView(ctx).apply {
+                            text = ctx.getString(R.string.acompanhamento_titulo)
                             textSize = 14f
                         })
 
@@ -189,52 +211,62 @@ class OrcamentoFragment : Fragment() {
                             val categoria = orc.getString("categoria") ?: continue
                             val limite = orc.getDouble("valorLimite") ?: 0.0
                             val gasto = gastosPorCategoria[categoria] ?: 0.0
-                            val status = if (gasto <= limite) "Dentro do orçamento" else "Ultrapassou o orçamento"
+                            val status = if (gasto <= limite)
+                                ctx.getString(R.string.dentro_orcamento)
+                            else
+                                ctx.getString(R.string.fora_orcamento)
 
-                            val resumo = TextView(requireContext())
-                            resumo.text = "$categoria: Gasto R$ %.2f / Limite R$ %.2f - $status".format(gasto, limite)
+                            val resumo = TextView(ctx)
+                            resumo.text = "$categoria: ${ctx.getString(R.string.gasto)} R$ %.2f / ${ctx.getString(R.string.limite)} R$ %.2f - $status"
+                                .format(gasto, limite)
                             resumo.textSize = 14f
                             layoutPorCategoria.addView(resumo)
                         }
                     }
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Erro ao calcular saldo real: ${it.message}", Toast.LENGTH_SHORT).show()
+                if (!isAdded || context == null) return@addOnFailureListener
+                Toast.makeText(ctx, ctx.getString(R.string.erro_calcular_saldo_real, it.message ?: ""), Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun mostrarDialogoAdicionarOrcamentoCategoria() {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_orcamento_categoria, null)
+        if (!isAdded || context == null || userId == null) return
+
+        val ctx = requireContext()
+        val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_orcamento_categoria, null)
 
         val spinnerCategoria = dialogView.findViewById<Spinner>(R.id.spinnerCategoria)
         val editValor = dialogView.findViewById<EditText>(R.id.editValor)
 
         if (spinnerCategoria == null || editValor == null) {
-            Toast.makeText(requireContext(), "Erro ao carregar layout do diálogo.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(ctx, ctx.getString(R.string.erro_layout_dialogo), Toast.LENGTH_SHORT).show()
             return
         }
 
-        db.collection("users").document(userId!!)
+        db.collection("users").document(userId)
             .collection("transacoes")
             .get()
             .addOnSuccessListener { docs ->
+                if (!isAdded || context == null) return@addOnSuccessListener
+
                 val categorias = docs.mapNotNull { it.getString("categoria") }
                     .toSet()
                     .sorted()
 
                 if (categorias.isEmpty()) {
-                    Toast.makeText(requireContext(), "Nenhuma categoria encontrada.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, ctx.getString(R.string.nenhuma_categoria), Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
 
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categorias)
+                val adapter = ArrayAdapter(ctx, android.R.layout.simple_spinner_item, categorias)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 spinnerCategoria.adapter = adapter
 
-                AlertDialog.Builder(requireContext())
-                    .setTitle("Novo Orçamento por Categoria")
+                AlertDialog.Builder(ctx)
+                    .setTitle(ctx.getString(R.string.titulo_novo_orcamento_dialogo))
                     .setView(dialogView)
-                    .setPositiveButton("Salvar") { _, _ ->
+                    .setPositiveButton(ctx.getString(R.string.salvar)) { _, _ ->
                         val categoria = spinnerCategoria.selectedItem?.toString()?.trim() ?: return@setPositiveButton
                         val valorStr = editValor.text.toString().replace(",", ".")
                         val valor = valorStr.toDoubleOrNull()
@@ -242,54 +274,67 @@ class OrcamentoFragment : Fragment() {
                         if (valor != null) {
                             salvarOrcamentoCategoria(categoria, valor)
                         } else {
-                            Toast.makeText(requireContext(), "Preencha o valor corretamente.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(ctx, ctx.getString(R.string.erro_valor), Toast.LENGTH_SHORT).show()
                         }
                     }
-                    .setNegativeButton("Cancelar", null)
+                    .setNegativeButton(ctx.getString(R.string.cancelar), null)
                     .show()
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Erro ao buscar categorias: ${it.message}", Toast.LENGTH_SHORT).show()
+                if (!isAdded || context == null) return@addOnFailureListener
+                Toast.makeText(ctx, ctx.getString(R.string.erro_buscar_categorias, it.message ?: ""), Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun salvarOrcamentoCategoria(categoria: String, valor: Double) {
+        if (!isAdded || context == null || userId == null) return
+        val ctx = requireContext()
+
         val dados = mapOf(
             "categoria" to categoria.replaceFirstChar { it.uppercaseChar() },
             "valorLimite" to valor
         )
 
-        db.collection("users").document(userId!!)
+        db.collection("users").document(userId)
             .collection("orcamento_categoria")
             .document(categoria.lowercase()) // ID = nome da categoria em minúsculo
             .set(dados)
             .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Orçamento salvo!", Toast.LENGTH_SHORT).show()
+                if (!isAdded || context == null) return@addOnSuccessListener
+                Toast.makeText(ctx, ctx.getString(R.string.orcamento_salvo), Toast.LENGTH_SHORT).show()
                 carregarOrcamentosCategoria() // Atualiza visualmente
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Erro ao salvar: ${it.message}", Toast.LENGTH_SHORT).show()
+                if (!isAdded || context == null) return@addOnFailureListener
+                Toast.makeText(ctx, ctx.getString(R.string.erro_salvar_generico, it.message ?: ""), Toast.LENGTH_SHORT).show()
             }
     }
 
+
     private fun carregarOrcamentosCategoria() {
-        if (userId == null) return
+        if (userId == null || !isAdded || context == null) return
+        val ctx = requireContext()
 
         db.collection("users").document(userId)
             .collection("orcamento_categoria")
             .get()
             .addOnSuccessListener { documentos ->
+                if (!isAdded || context == null) return@addOnSuccessListener
                 layoutPorCategoria.removeAllViews()
 
                 for (doc in documentos) {
                     val categoria = doc.getString("categoria") ?: continue
                     val valor = doc.getDouble("valorLimite") ?: continue
 
-                    val view = TextView(requireContext())
-                    view.text = "$categoria - Limite: R$ %.2f".format(valor)
+                    val view = TextView(ctx)
+                    view.text = "$categoria - ${ctx.getString(R.string.valor_limite)} R$ %.2f".format(valor)
                     view.textSize = 14f
                     layoutPorCategoria.addView(view)
                 }
+            }
+            .addOnFailureListener {
+                if (!isAdded || context == null) return@addOnFailureListener
+                Toast.makeText(ctx, ctx.getString(R.string.erro_buscar_categorias, it.message ?: ""), Toast.LENGTH_SHORT).show()
             }
     }
 

@@ -54,7 +54,7 @@ class EditTransactionDialog(
                             categoriasCombinadas.add(nome)
                         }
                     }
-                    categoriasCombinadas.add("+ Adicionar nova categoria")
+                    categoriasCombinadas.add(getString(R.string.adicionar_categoria))
 
                     val safeContext = context
                     if (isAdded && safeContext != null) {
@@ -79,8 +79,8 @@ class EditTransactionDialog(
 
         return AlertDialog.Builder(requireActivity().takeIf { isAdded } ?: return super.onCreateDialog(savedInstanceState))
             .setView(view)
-            .setTitle("Editar Transação")
-            .setPositiveButton("Atualizar") { _, _ ->
+            .setTitle(getString(R.string.editar_transacao))
+            .setPositiveButton(getString(R.string.atualizar)) { _, _ ->
                 val categoria = spinnerCategoria.selectedItem.toString()
                 val valor = inputValor.text.toString().toDoubleOrNull()
                 val descricao = inputDescricao.text.toString().trim()
@@ -103,24 +103,24 @@ class EditTransactionDialog(
                         .addOnSuccessListener {
                             val safeContext = context
                             if (isAdded && safeContext != null) {
-                                Toast.makeText(safeContext, "Transação atualizada!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(safeContext, getString(R.string.transacao_atualizada), Toast.LENGTH_SHORT).show()
                             }
                             onAtualizado()
                         }
                         .addOnFailureListener {
                             val safeContext = context
                             if (isAdded && safeContext != null) {
-                                Toast.makeText(safeContext, "Erro ao atualizar: ${it.message}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(safeContext, getString(R.string.erro_ao_atualizar, it.message), Toast.LENGTH_SHORT).show()
                             }
                         }
                 } else {
                     val safeContext = context
                     if (isAdded && safeContext != null) {
-                        Toast.makeText(safeContext, "Preencha os campos corretamente!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(safeContext, getString(R.string.preencha_corretamente), Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.cancelar), null)
             .create()
     }
 
@@ -145,9 +145,9 @@ class EditTransactionDialog(
         val input = EditText(ctx)
 
         AlertDialog.Builder(ctx)
-            .setTitle("Nova Categoria")
+            .setTitle(getString(R.string.nova_categoria))
             .setView(input)
-            .setPositiveButton("Salvar") { _, _ ->
+            .setPositiveButton(getString(R.string.salvar)) { _, _ ->
                 val novaCategoria = input.text.toString().trim()
                 val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@setPositiveButton
 
@@ -160,7 +160,7 @@ class EditTransactionDialog(
                         .add(categoriaObj)
                         .addOnSuccessListener {
                             if (!isAdded || context == null) return@addOnSuccessListener
-                            Toast.makeText(ctx, "Categoria adicionada!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(ctx, getString(R.string.categoria_adicionada), Toast.LENGTH_SHORT).show()
                             (spinner.adapter as ArrayAdapter<String>).insert(novaCategoria, spinner.adapter.count - 1)
                             spinner.setSelection(spinner.adapter.count - 2)
                         }

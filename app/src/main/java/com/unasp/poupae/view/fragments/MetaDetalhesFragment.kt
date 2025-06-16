@@ -17,8 +17,16 @@ import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
+class MetaDetalhesFragment : Fragment() {
 
+    private lateinit var meta: Meta
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            meta = it.getSerializable("meta") as Meta
+        }
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -51,12 +59,10 @@ class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
 
         btnExcluir.setOnClickListener {
             AlertDialog.Builder(requireContext())
-                .setTitle("Excluir meta")
-                .setMessage("Tem certeza que deseja excluir esta meta? O valor atual será retornado ao seu saldo.")
-                .setPositiveButton("Sim") { _, _ ->
-                    excluirMeta()
-                }
-                .setNegativeButton("Cancelar", null)
+                .setTitle(getString(R.string.excluir_meta_titulo))
+                .setMessage(getString(R.string.excluir_meta_mensagem))
+                .setPositiveButton(getString(R.string.sim)) { _, _ -> excluirMeta() }
+                .setNegativeButton(getString(R.string.cancelar), null)
                 .show()
         }
 
@@ -73,16 +79,19 @@ class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
         val context = view?.context ?: return
         val input = EditText(context).apply {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-            hint = "Digite o valor"
+            hint = getString(R.string.hint_valor)
         }
 
-        val titulo = if (adicionar) "Adicionar valor à meta" else "Retirar valor da meta"
+        val titulo = if (adicionar)
+            getString(R.string.adicionar_valor_meta)
+        else
+            getString(R.string.retirar_valor_meta)
         val fator = if (adicionar) 1 else -1
 
         AlertDialog.Builder(context)
             .setTitle(titulo)
             .setView(input)
-            .setPositiveButton("Confirmar") { _, _ ->
+            .setPositiveButton(getString(R.string.confirmar)) { _, _ ->
                 val valor = input.text.toString().toDoubleOrNull()
                 if (valor != null && valor > 0) {
                     val novoValor = meta.valorAtual + (valor * fator)
@@ -117,18 +126,19 @@ class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
 
                             Toast.makeText(
                                 context,
-                                if (adicionar) "Valor adicionado!" else "Valor retirado!",
+                                if (adicionar) getString(R.string.valor_adicionado) else getString(R.string.valor_retirado),
                                 Toast.LENGTH_SHORT
                             ).show()
+
                         }
                         .addOnFailureListener {
-                            Toast.makeText(context, "Erro: ${it.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, getString(R.string.erro_generico, it.message ?: ""), Toast.LENGTH_SHORT).show()
                         }
                 } else {
-                    Toast.makeText(context, "Digite um valor válido", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.valor_invalido), Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.cancelar), null)
             .show()
     }
 
@@ -139,7 +149,6 @@ class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
         val data = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         val categoriaMeta = "[META] ${meta.nome}"
 
-        // Primeiro: excluir todas as transações associadas à meta
         db.collection("users").document(userId)
             .collection("transacoes")
             .whereEqualTo("categoria", categoriaMeta)
@@ -150,24 +159,23 @@ class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
                 for (doc in transacoesDocs) {
                     batch.delete(doc.reference)
                 }
-                // Exclui o documento da meta
                 val metaRef = db.collection("users").document(userId)
                     .collection("metas").document(meta.id)
                 batch.delete(metaRef)
 
-                // Commita todas as ações
                 batch.commit()
                     .addOnSuccessListener {
-                        Toast.makeText(requireContext(), "Meta e registros excluídos com sucesso!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.meta_excluida_sucesso), Toast.LENGTH_SHORT).show()
                         parentFragmentManager.popBackStack()
                     }
                     .addOnFailureListener {
-                        Toast.makeText(requireContext(), "Erro ao excluir registros da meta: ${it.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), getString(R.string.erro_excluir_registros, it.message ?: ""), Toast.LENGTH_SHORT).show()
                     }
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Erro ao buscar registros da meta: ${it.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.erro_buscar_registros, it.message ?: ""), Toast.LENGTH_SHORT).show()
             }
+        requireActivity().findViewById<View>(R.id.detailContainer)?.visibility = View.GONE
     }
 
     private fun mostrarDialogoEditarMeta() {
@@ -183,9 +191,9 @@ class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
         edtData.setText(meta.dataLimite)
 
         AlertDialog.Builder(context)
-            .setTitle("Editar meta")
+            .setTitle(getString(R.string.editar_meta))
             .setView(layout)
-            .setPositiveButton("Salvar") { _, _ ->
+            .setPositiveButton(getString(R.string.salvar)) { _, _ ->
                 val novoNome = edtNome.text.toString()
                 val novoValorAlvo = edtValor.text.toString().toDoubleOrNull() ?: meta.valorAlvo
                 val novaData = edtData.text.toString()
@@ -207,13 +215,13 @@ class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
                         meta.valorAlvo = novoValorAlvo
                         meta.dataLimite = novaData
                         atualizarTela()
-                        Toast.makeText(context, "Meta atualizada!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, getString(R.string.meta_atualizada), Toast.LENGTH_SHORT).show()
                     }
                     .addOnFailureListener {
-                        Toast.makeText(context, "Erro ao editar meta: ${it.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, getString(R.string.erro_editar_meta, it.message ?: ""), Toast.LENGTH_SHORT).show()
                     }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.cancelar), null)
             .show()
     }
 
@@ -223,4 +231,13 @@ class MetaDetalhesFragment(private val meta: Meta) : Fragment() {
         view?.findViewById<TextView>(R.id.txtDetalheDataLimite)?.text = meta.dataLimite ?: "--"
     }
 
+    companion object {
+        fun newInstance(meta: Meta): MetaDetalhesFragment {
+            val fragment = MetaDetalhesFragment()
+            val args = Bundle()
+            args.putSerializable("meta", meta)
+            fragment.arguments = args
+            return fragment
+        }
+    }
 }

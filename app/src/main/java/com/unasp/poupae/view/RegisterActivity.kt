@@ -33,15 +33,16 @@ class RegisterActivity : AppCompatActivity() {
                 auth.createUserWithEmailAndPassword(email, senha)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(this, "Conta criada com sucesso!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, getString(R.string.conta_criada_sucesso), Toast.LENGTH_SHORT).show()
                             startActivity(Intent(this, MainActivity::class.java))
                             finish()
                         } else {
-                            Toast.makeText(this, "Erro ao criar conta: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                            val erro = task.exception?.message ?: ""
+                            Toast.makeText(this, getString(R.string.erro_criar_conta, erro), Toast.LENGTH_LONG).show()
                         }
                     }
             } else {
-                Toast.makeText(this, "Preencha um email válido e senha com pelo menos 6 caracteres", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.erro_email_senha), Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -16,8 +16,29 @@ import java.util.*
 
 class AddTransactionDialog : DialogFragment() {
 
-    private val categoriasDespesa = listOf("Alimentação", "Transporte", "Lazer", "Saúde", "Educação", "Moradia", "Outros")
-    private val categoriasGanho = listOf("Salário", "Freelancer", "Aluguel", "Venda", "Devolução", "Outros")
+    private val categoriasDespesa by lazy {
+        listOf(
+            getString(R.string.cat_alimentacao),
+            getString(R.string.cat_transporte),
+            getString(R.string.cat_lazer),
+            getString(R.string.cat_saude),
+            getString(R.string.cat_educacao),
+            getString(R.string.cat_moradia),
+            getString(R.string.cat_outros)
+        )
+    }
+
+    private val categoriasGanho by lazy {
+        listOf(
+            getString(R.string.cat_salario),
+            getString(R.string.cat_freelancer),
+            getString(R.string.cat_aluguel),
+            getString(R.string.cat_venda),
+            getString(R.string.cat_devolucao),
+            getString(R.string.cat_outros)
+        )
+    }
+
     private val categoriasPersonalizadas = mutableListOf<String>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -34,14 +55,18 @@ class AddTransactionDialog : DialogFragment() {
         val db = FirebaseFirestore.getInstance()
         val userId = FirebaseAuth.getInstance().currentUser?.uid
 
-        val tipoAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, listOf("Despesa", "Ganho"))
+        val tipoAdapter = ArrayAdapter(
+            requireContext(),
+            R.layout.spinner_item,
+            listOf(getString(R.string.despesa), getString(R.string.ganho))
+        )
         tipoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerTipo.adapter = tipoAdapter
 
         val categoriasCombinadas = mutableListOf<String>()
-        categoriasCombinadas.add("Selecione uma categoria")
+        categoriasCombinadas.add(getString(R.string.selecione_categoria))
         categoriasCombinadas.addAll(categoriasDespesa)
-        categoriasCombinadas.add("+ Adicionar nova categoria")
+        categoriasCombinadas.add(getString(R.string.adicionar_categoria))
         setupSpinner(spinnerCategoria, categoriasCombinadas)
 
         userId?.let { uid ->
@@ -75,9 +100,9 @@ class AddTransactionDialog : DialogFragment() {
         spinnerTipo.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val tipoSelecionado = parent?.getItemAtPosition(position).toString()
-                val listaBase = if (tipoSelecionado == "Despesa") categoriasDespesa else categoriasGanho
+                val listaBase = if (tipoSelecionado == getString(R.string.despesa)) categoriasDespesa else categoriasGanho
                 val novaLista = mutableListOf<String>()
-                novaLista.add("Selecione uma categoria")
+                novaLista.add(getString(R.string.selecione_categoria))
                 novaLista.addAll(listaBase)
                 novaLista.addAll(categoriasPersonalizadas.filterNot { novaLista.contains(it) })
                 if (tipoSelecionado == "Despesa") {
@@ -93,12 +118,12 @@ class AddTransactionDialog : DialogFragment() {
                                         novaLista.add(novaLista.size, nomeCompleto)
                                     }
                                 }
-                                novaLista.add("+ Adicionar nova categoria")
+                                novaLista.add(getString(R.string.adicionar_categoria))
                                 setupSpinner(spinnerCategoria, novaLista)
                             }
                     }
                 } else {
-                    novaLista.add("+ Adicionar nova categoria")
+                    novaLista.add(getString(R.string.adicionar_categoria))
                     setupSpinner(spinnerCategoria, novaLista)
                 }
             }
@@ -109,7 +134,7 @@ class AddTransactionDialog : DialogFragment() {
         spinnerCategoria.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val item = spinnerCategoria.selectedItem.toString()
-                if (item == "+ Adicionar nova categoria") {
+                if (item == getString(R.string.adicionar_categoria)) {
                     showNovaCategoriaDialog(spinnerCategoria)
                 }
             }
@@ -119,9 +144,9 @@ class AddTransactionDialog : DialogFragment() {
 
         return AlertDialog.Builder(requireContext())
             .setView(view)
-            .setTitle("Adicionar Transação")
-            .setPositiveButton("Salvar", null) // Define manualmente depois
-            .setNegativeButton("Cancelar") { _, _ ->
+            .setTitle(getString(R.string.adicionar_transacao))
+            .setPositiveButton(getString(R.string.salvar), null)
+            .setNegativeButton(getString(R.string.cancelar)) { _, _ ->
                 spinnerCategoria.setSelection(0)
             }
             .create().also { dialog ->
@@ -135,13 +160,16 @@ class AddTransactionDialog : DialogFragment() {
                         val tipo = spinnerTipo.selectedItem.toString().lowercase(Locale.getDefault())
                         val recorrente = checkRecorrente.isChecked
 
-                        if (valor != null && userId != null && categoria != "Selecione uma categoria" && categoria != "+ Adicionar nova categoria") {
-                            if (tipo == "ganho" && categoria == "Salário") {
+                        if (valor != null && userId != null &&
+                            categoria != getString(R.string.selecione_categoria) &&
+                            categoria != getString(R.string.adicionar_categoria)
+                        ) {
+                            if (tipo == getString(R.string.ganho).lowercase() && categoria == getString(R.string.cat_salario)) {
                                 verificarSalarioJaRegistrado(valor) {
                                     salvarTransacao(userId, nome, categoria, valor, descricao, tipo, recorrente)
-                                    dismiss() // Fecha só se confirmado
+                                    dismiss()
                                 }
-                            } else if (tipo == "despesa") {
+                            } else if (tipo == getString(R.string.despesa).lowercase()) {
                                 registrarDespesaComValidacao(valor) {
                                     salvarTransacao(userId, nome, categoria, valor, descricao, tipo, recorrente)
                                     dismiss()
@@ -151,7 +179,7 @@ class AddTransactionDialog : DialogFragment() {
                                 dismiss()
                             }
                         } else {
-                            Toast.makeText(requireContext(), "Preencha os campos corretamente!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.preencha_campos), Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -226,9 +254,9 @@ class AddTransactionDialog : DialogFragment() {
     private fun showNovaCategoriaDialog(spinner: Spinner) {
         val input = EditText(requireContext())
         AlertDialog.Builder(requireContext())
-            .setTitle("Nova Categoria")
+            .setTitle(getString(R.string.nova_categoria))
             .setView(input)
-            .setPositiveButton("Salvar") { _, _ ->
+            .setPositiveButton(getString(R.string.salvar)) { _, _ ->
                 val novaCategoria = input.text.toString().trim()
                 val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@setPositiveButton
 
@@ -239,7 +267,7 @@ class AddTransactionDialog : DialogFragment() {
                         .collection("categorias")
                         .add(categoriaObj)
                         .addOnSuccessListener {
-                            Toast.makeText(requireContext(), "Categoria adicionada!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), getString(R.string.categoria_adicionada), Toast.LENGTH_SHORT).show()
                             (spinner.adapter as ArrayAdapter<String>).insert(novaCategoria, spinner.adapter.count - 1)
                             spinner.setSelection(spinner.adapter.count - 2)
                         }
@@ -247,7 +275,7 @@ class AddTransactionDialog : DialogFragment() {
                     spinner.setSelection(0)
                 }
             }
-            .setNegativeButton("Cancelar") { _, _ ->
+            .setNegativeButton(getString(R.string.cancelar)) { _, _ ->
                 spinner.setSelection(0)
             }
             .show()
@@ -265,7 +293,7 @@ class AddTransactionDialog : DialogFragment() {
         db.collection("users").document(userId)
             .collection("transacoes")
             .whereEqualTo("tipo", "ganho")
-            .whereEqualTo("categoria", "Salário")
+            .whereEqualTo("categoria", getString(R.string.cat_salario))
             .whereGreaterThanOrEqualTo("data", dataInicioMes)
             .get()
             .addOnSuccessListener { result ->
@@ -273,10 +301,10 @@ class AddTransactionDialog : DialogFragment() {
                     onContinuar()
                 } else {
                     AlertDialog.Builder(requireActivity())
-                        .setTitle("Salário já registrado")
-                        .setMessage("O salário deste mês já foi registrado. Deseja registrar novamente?")
-                        .setPositiveButton("Sim") { _, _ -> onContinuar() }
-                        .setNegativeButton("Cancelar", null)
+                        .setTitle(getString(R.string.salario_registrado_titulo))
+                        .setMessage(getString(R.string.salario_registrado_mensagem))
+                        .setPositiveButton(getString(R.string.sim)) { _, _ -> onContinuar() }
+                        .setNegativeButton(getString(R.string.cancelar), null)
                         .show()
                 }
             }
@@ -289,9 +317,9 @@ class AddTransactionDialog : DialogFragment() {
         calcularSaldoRealDoUsuario { saldoAtual ->
             if (valorDespesa > saldoAtual) {
                 AlertDialog.Builder(requireContext())
-                    .setTitle("Saldo insuficiente")
-                    .setMessage("Você não possui saldo suficiente para registrar esta despesa.")
-                    .setPositiveButton("OK", null)
+                    .setTitle(getString(R.string.saldo_insuficiente_titulo))
+                    .setMessage(getString(R.string.saldo_insuficiente_mensagem))
+                    .setPositiveButton(getString(R.string.ok), null)
                     .show()
             } else {
                 onContinuar()

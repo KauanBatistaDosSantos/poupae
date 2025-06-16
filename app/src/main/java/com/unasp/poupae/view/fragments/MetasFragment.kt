@@ -32,9 +32,9 @@ class MetasFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerMetas)
         recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = MetaAdapter(requireContext(), listaMetas) { meta ->
-            val fragment = MetaDetalhesFragment(meta)
+            val fragment = MetaDetalhesFragment.newInstance(meta)
             parentFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, fragment) // Use o ID correto do container
+                .replace(R.id.fragmentContainer, fragment)
                 .addToBackStack(null)
                 .commit()
         }

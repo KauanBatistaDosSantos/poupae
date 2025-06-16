@@ -48,11 +48,15 @@ class MainActivity : AppCompatActivity() {
         navView.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_config -> {
-                    val idiomas = arrayOf("Português", "Inglês", "Espanhol")
+                    val idiomas = arrayOf(
+                        getString(R.string.idioma_portugues),
+                        getString(R.string.idioma_ingles),
+                        getString(R.string.idioma_espanhol)
+                    )
                     val codigos = arrayOf("pt", "en", "es")
 
                     AlertDialog.Builder(this)
-                        .setTitle("Escolha o idioma")
+                        .setTitle(getString(R.string.escolha_idioma))
                         .setItems(idiomas) { _, which ->
                             val language = codigos[which]
                             setAppLocale(this, language)

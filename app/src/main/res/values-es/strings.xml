@@ -41,8 +41,6 @@
     <string name="ganhos_recorrentes">Ingresos Recurrentes</string>
     <string name="gastos_recorrentes">Gastos Recurrentes</string>
     <string name="saldos">Saldos</string>
-    <string name="saldo_recorrente">Saldo Recurrente: R$ 0,00</string>
-    <string name="saldo_real">Saldo Real: R$ 0,00</string>
     <string name="orcamento_por_categoria">Presupuesto por Categoría</string>
     <string name="definir_orcamento_categoria">Definir presupuesto por categoría</string>
     <string name="meta_generica">Meta</string>
@@ -53,4 +51,111 @@
     <string name="configuracoes">Configuración</string>
     <string name="sair">Cerrar sesión</string>
     <string name="adicionar">Agregar</string>
+
+    <string name="conta_criada_sucesso">¡Cuenta creada con éxito!</string>
+    <string name="erro_criar_conta">Error al crear la cuenta: %1$s</string>
+    <string name="erro_email_senha">Introduce un correo válido y una contraseña de al menos 6 caracteres</string>
+
+    <string name="escolha_idioma">Elige el idioma</string>
+    <string name="idioma_portugues">Portugués</string>
+    <string name="idioma_ingles">Inglés</string>
+    <string name="idioma_espanhol">Español</string>
+
+    <string name="erro_google_login">Error al iniciar sesión con Google</string>
+    <string name="erro_generico">Error: %1$s</string>
+    <string name="erro_login_email">Error al iniciar sesión: %1$s</string>
+    <string name="preencha_campos">Completa todos los campos</string>
+
+    <string name="titulo_novo_orcamento_categoria">Nuevo presupuesto por categoría</string>
+    <string name="titulo_novo_orcamento_dialogo">Nuevo Presupuesto por Categoría</string>
+    <string name="salvar">Guardar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="hint_categoria">Categoría</string>
+    <string name="hint_valor">Valor en R$</string>
+    <string name="orcamento_salvo">¡Presupuesto guardado!</string>
+    <string name="erro_salvar_orcamento">Error al guardar el presupuesto.</string>
+    <string name="erro_carregar_orcamento">Error al cargar el presupuesto: %1$s</string>
+    <string name="saldo_recorrente">Saldo Recurrente: R$ %.2f</string>
+    <string name="saldo_real">Saldo Real: R$ %.2f</string>
+    <string name="dentro_orcamento">Dentro del presupuesto</string>
+    <string name="fora_orcamento">Presupuesto excedido</string>
+    <string name="erro_calcular_saldo_real">Error al calcular el saldo real: %1$s</string>
+    <string name="erro_layout_dialogo">Error al cargar el diseño del diálogo.</string>
+    <string name="nenhuma_categoria">No se encontraron categorías.</string>
+    <string name="erro_valor">Completa el valor correctamente.</string>
+    <string name="erro_buscar_categorias">Error al buscar categorías: %1$s</string>
+    <string name="erro_salvar_generico">Error al guardar: %1$s</string>
+    <string name="gasto">Gasto</string>
+    <string name="limite">Límite</string>
+    <string name="acompanhamento_titulo">\n-- Seguimiento del presupuesto por categoría --</string>
+
+    <string name="excluir_meta_titulo">Eliminar meta</string>
+    <string name="excluir_meta_mensagem">¿Estás seguro de que deseas eliminar esta meta? El valor actual se devolverá a tu saldo.</string>
+    <string name="sim">Sí</string>
+
+    <string name="adicionar_valor_meta">Agregar valor a la meta</string>
+    <string name="retirar_valor_meta">Retirar valor de la meta</string>
+    <string name="confirmar">Confirmar</string>
+    <string name="hint_digite_valor">Ingresa el valor</string>
+    <string name="valor_adicionado">¡Valor agregado!</string>
+    <string name="valor_retirado">¡Valor retirado!</string>
+    <string name="valor_invalido">Ingresa un valor válido</string>
+
+    <string name="meta_excluida_sucesso">¡Meta y registros eliminados con éxito!</string>
+    <string name="erro_excluir_registros">Error al eliminar los registros de la meta: %1$s</string>
+    <string name="erro_buscar_registros">Error al buscar los registros de la meta: %1$s</string>
+
+    <string name="meta_atualizada">¡Meta actualizada!</string>
+    <string name="erro_editar_meta">Error al editar la meta: %1$s</string>
+
+    <string name="erro_carregar_transacoes">Error al cargar transacciones</string>
+    <string name="grafico_entradas">Ingresos</string>
+    <string name="grafico_saidas">Gastos</string>
+    <string name="mes_janeiro">Ene</string>
+    <string name="mes_fevereiro">Feb</string>
+    <string name="mes_marco">Mar</string>
+    <string name="mes_abril">Abr</string>
+    <string name="mes_maio">May</string>
+    <string name="mes_junho">Jun</string>
+    <string name="mes_julho">Jul</string>
+    <string name="mes_agosto">Ago</string>
+    <string name="mes_setembro">Sep</string>
+    <string name="mes_outubro">Oct</string>
+    <string name="mes_novembro">Nov</string>
+    <string name="mes_dezembro">Dic</string>
+
+    <string name="nova_meta">Nueva Meta</string>
+
+    <string name="editar_transacao">Editar Transacción</string>
+    <string name="atualizar">Actualizar</string>
+    <string name="nova_categoria">Nueva Categoría</string>
+    <string name="categoria_adicionada">¡Categoría añadida!</string>
+    <string name="transacao_atualizada">¡Transacción actualizada!</string>
+    <string name="erro_ao_atualizar">Error al actualizar: %1$s</string>
+    <string name="preencha_corretamente">¡Complete los campos correctamente!</string>
+    <string name="adicionar_categoria">+ Añadir nueva categoría</string>
+
+    <string name="adicionar_transacao">Agregar Transacción</string>
+    <string name="salario_registrado_titulo">Salario ya registrado</string>
+    <string name="salario_registrado_mensagem">El salario de este mes ya fue registrado. ¿Desea registrarlo nuevamente?</string>
+    <string name="saldo_insuficiente_titulo">Saldo insuficiente</string>
+    <string name="saldo_insuficiente_mensagem">No tienes saldo suficiente para registrar este gasto.</string>
+    <string name="ok">OK</string>
+    <string name="selecione_categoria">Seleccione una categoría</string>
+    <string name="despesa">Gasto</string>
+    <string name="ganho">Ingreso</string>
+
+    <string name="cat_alimentacao">Alimentación</string>
+    <string name="cat_transporte">Transporte</string>
+    <string name="cat_lazer">Ocio</string>
+    <string name="cat_saude">Salud</string>
+    <string name="cat_educacao">Educación</string>
+    <string name="cat_moradia">Vivienda</string>
+    <string name="cat_outros">Otros</string>
+    <string name="cat_salario">Salario</string>
+    <string name="cat_freelancer">Freelance</string>
+    <string name="cat_aluguel">Alquiler</string>
+    <string name="cat_venda">Venta</string>
+    <string name="cat_devolucao">Reembolso</string>
+
 </resources>

@@ -29,11 +29,11 @@ class LoginActivity : AppCompatActivity() {
                         if (authTask.isSuccessful) {
                             goToMain()
                         } else {
-                            showToast("Erro ao logar com o Google")
+                            showToast(getString(R.string.erro_google_login))
                         }
                     }
             } catch (e: Exception) {
-                showToast("Erro: ${e.message}")
+                showToast(getString(R.string.erro_generico, e.message ?: ""))
             }
         }
 
@@ -77,11 +77,12 @@ class LoginActivity : AppCompatActivity() {
                         if (task.isSuccessful) {
                             goToMain()
                         } else {
-                            showToast("Erro ao fazer login: ${task.exception?.message}")
+                            val erro = task.exception?.message ?: ""
+                            showToast(getString(R.string.erro_login_email, erro))
                         }
                     }
             } else {
-                showToast("Preencha todos os campos")
+                showToast(getString(R.string.preencha_campos))
             }
         }
 

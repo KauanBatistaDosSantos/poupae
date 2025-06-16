@@ -117,14 +117,27 @@ class ExtratoFragment : Fragment() {
                 adapter.notifyDataSetChanged()
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Erro ao carregar transações", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.erro_carregar_transacoes), Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun gerarGrafico(ganhos: Map<Int, Float>, despesas: Map<Int, Float>) {
         val entriesGanhos = mutableListOf<BarEntry>()
         val entriesDespesas = mutableListOf<BarEntry>()
-        val labelsCompletos = listOf("Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+        val labelsCompletos = listOf(
+            getString(R.string.mes_janeiro),
+            getString(R.string.mes_fevereiro),
+            getString(R.string.mes_marco),
+            getString(R.string.mes_abril),
+            getString(R.string.mes_maio),
+            getString(R.string.mes_junho),
+            getString(R.string.mes_julho),
+            getString(R.string.mes_agosto),
+            getString(R.string.mes_setembro),
+            getString(R.string.mes_outubro),
+            getString(R.string.mes_novembro),
+            getString(R.string.mes_dezembro)
+        )
         val mesAtual = Calendar.getInstance().get(Calendar.MONTH)
         val labelsVisiveis = labelsCompletos.subList(0, mesAtual + 1)
 
@@ -133,13 +146,13 @@ class ExtratoFragment : Fragment() {
             entriesDespesas.add(BarEntry(i.toFloat(), despesas.getOrDefault(i, 0f)))
         }
 
-        val dataSetGanhos = BarDataSet(entriesGanhos, "Entradas").apply {
+        val dataSetGanhos = BarDataSet(entriesGanhos, getString(R.string.grafico_entradas)).apply {
             color = ColorTemplate.MATERIAL_COLORS[0]
             valueTextColor = Color.WHITE // ← muda a cor dos valores sobre as barras
             valueTextSize = 12f          // (opcional) aumenta um pouco a fonte
         }
 
-        val dataSetDespesas = BarDataSet(entriesDespesas, "Saídas").apply {
+        val dataSetDespesas = BarDataSet(entriesDespesas, getString(R.string.grafico_saidas)).apply {
             color = ColorTemplate.MATERIAL_COLORS[1]
             valueTextColor = Color.WHITE
             valueTextSize = 12f

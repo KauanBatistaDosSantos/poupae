@@ -8,6 +8,7 @@
     android:fitsSystemWindows="true">
 
     <LinearLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -22,12 +23,19 @@
             app:titleTextColor="@color/amarelo"
             app:contentInsetStart="16dp" />
 
-        <androidx.fragment.app.FragmentContainerView
+        <FrameLayout
             android:id="@+id/fragmentContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <FrameLayout
+            android:id="@+id/detailContainer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:name="androidx.fragment.app.Fragment" />
+            android:visibility="gone"
+            android:background="@android:color/white" />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigation"

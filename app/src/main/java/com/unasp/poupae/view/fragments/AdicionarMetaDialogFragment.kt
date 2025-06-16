@@ -24,9 +24,9 @@ class AdicionarMetaDialogFragment(
         val etData = view.findViewById<EditText>(R.id.etDataLimiteMeta)
 
         return AlertDialog.Builder(requireContext())
-            .setTitle("Nova Meta")
+            .setTitle(getString(R.string.nova_meta))
             .setView(view)
-            .setPositiveButton("Salvar") { _, _ ->
+            .setPositiveButton(getString(R.string.salvar)) { _, _ ->
                 val nome = etNome.text.toString()
                 val valor = etValor.text.toString().toDoubleOrNull() ?: 0.0
                 val dataLimite = etData.text.toString().ifBlank { null }
@@ -49,7 +49,7 @@ class AdicionarMetaDialogFragment(
                         onMetaAdicionada()
                     }
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton(getString(R.string.cancelar), null)
             .create()
     }
 }

@@ -41,8 +41,6 @@
     <string name="ganhos_recorrentes">Recurring Income</string>
     <string name="gastos_recorrentes">Recurring Expenses</string>
     <string name="saldos">Balances</string>
-    <string name="saldo_recorrente">Recurring Balance: R$ 0.00</string>
-    <string name="saldo_real">Actual Balance: R$ 0.00</string>
     <string name="orcamento_por_categoria">Budget by Category</string>
     <string name="definir_orcamento_categoria">Set budget by category</string>
     <string name="meta_generica">Goal</string>
@@ -53,4 +51,110 @@
     <string name="configuracoes">Settings</string>
     <string name="sair">Sign out</string>
     <string name="adicionar">Add</string>
+
+    <string name="conta_criada_sucesso">Account successfully created!</string>
+    <string name="erro_criar_conta">Error creating account: %1$s</string>
+    <string name="erro_email_senha">Please enter a valid email and a password with at least 6 characters</string>
+
+    <string name="escolha_idioma">Choose language</string>
+    <string name="idioma_portugues">Portuguese</string>
+    <string name="idioma_ingles">English</string>
+    <string name="idioma_espanhol">Spanish</string>
+
+    <string name="erro_google_login">Error signing in with Google</string>
+    <string name="erro_generico">Error: %1$s</string>
+    <string name="erro_login_email">Error signing in: %1$s</string>
+    <string name="preencha_campos">Please fill in all fields</string>
+
+    <string name="titulo_novo_orcamento_categoria">New budget by category</string>
+    <string name="titulo_novo_orcamento_dialogo">New Budget by Category</string>
+    <string name="salvar">Save</string>
+    <string name="cancelar">Cancel</string>
+    <string name="hint_categoria">Category</string>
+    <string name="hint_valor">Amount in R$</string>
+    <string name="orcamento_salvo">Budget saved!</string>
+    <string name="erro_salvar_orcamento">Error saving budget.</string>
+    <string name="erro_carregar_orcamento">Error loading budget: %1$s</string>
+    <string name="saldo_recorrente">Recurring Balance: R$ %.2f</string>
+    <string name="saldo_real">Actual Balance: R$ %.2f</string>
+    <string name="dentro_orcamento">Within budget</string>
+    <string name="fora_orcamento">Over budget</string>
+    <string name="erro_calcular_saldo_real">Error calculating actual balance: %1$s</string>
+    <string name="erro_layout_dialogo">Error loading dialog layout.</string>
+    <string name="nenhuma_categoria">No categories found.</string>
+    <string name="erro_valor">Please fill in the amount correctly.</string>
+    <string name="erro_buscar_categorias">Error fetching categories: %1$s</string>
+    <string name="erro_salvar_generico">Error saving: %1$s</string>
+    <string name="gasto">Spent</string>
+    <string name="limite">Limit</string>
+    <string name="acompanhamento_titulo">\n-- Budget tracking by category --</string>
+
+    <string name="excluir_meta_titulo">Delete goal</string>
+    <string name="excluir_meta_mensagem">Are you sure you want to delete this goal? The current amount will be returned to your balance.</string>
+    <string name="sim">Yes</string>
+
+    <string name="adicionar_valor_meta">Add amount to goal</string>
+    <string name="retirar_valor_meta">Withdraw amount from goal</string>
+    <string name="confirmar">Confirm</string>
+    <string name="hint_digite_valor">Enter amount</string>
+    <string name="valor_adicionado">Amount added!</string>
+    <string name="valor_retirado">Amount withdrawn!</string>
+    <string name="valor_invalido">Enter a valid amount</string>
+
+    <string name="meta_excluida_sucesso">Goal and records successfully deleted!</string>
+    <string name="erro_excluir_registros">Error deleting goal records: %1$s</string>
+    <string name="erro_buscar_registros">Error fetching goal records: %1$s</string>
+
+    <string name="meta_atualizada">Goal updated!</string>
+    <string name="erro_editar_meta">Error updating goal: %1$s</string>
+
+    <string name="erro_carregar_transacoes">Error loading transactions</string>
+    <string name="grafico_entradas">Income</string>
+    <string name="grafico_saidas">Expenses</string>
+    <string name="mes_janeiro">Jan</string>
+    <string name="mes_fevereiro">Feb</string>
+    <string name="mes_marco">Mar</string>
+    <string name="mes_abril">Apr</string>
+    <string name="mes_maio">May</string>
+    <string name="mes_junho">Jun</string>
+    <string name="mes_julho">Jul</string>
+    <string name="mes_agosto">Aug</string>
+    <string name="mes_setembro">Sep</string>
+    <string name="mes_outubro">Oct</string>
+    <string name="mes_novembro">Nov</string>
+    <string name="mes_dezembro">Dec</string>
+
+    <string name="nova_meta">New Goal</string>
+
+    <string name="editar_transacao">Edit Transaction</string>
+    <string name="atualizar">Update</string>
+    <string name="nova_categoria">New Category</string>
+    <string name="categoria_adicionada">Category added!</string>
+    <string name="transacao_atualizada">Transaction updated!</string>
+    <string name="erro_ao_atualizar">Error updating: %1$s</string>
+    <string name="preencha_corretamente">Please fill in the fields correctly!</string>
+    <string name="adicionar_categoria">+ Add new category</string>
+
+    <string name="adicionar_transacao">Add Transaction</string>
+    <string name="salario_registrado_titulo">Salary Already Registered</string>
+    <string name="salario_registrado_mensagem">Salary for this month is already registered. Do you want to register it again?</string>
+    <string name="saldo_insuficiente_titulo">Insufficient Balance</string>
+    <string name="saldo_insuficiente_mensagem">You do not have enough balance to register this expense.</string>
+    <string name="ok">OK</string>
+    <string name="selecione_categoria">Select a category</string>
+    <string name="despesa">Expense</string>
+    <string name="ganho">Income</string>
+
+    <string name="cat_alimentacao">Food</string>
+    <string name="cat_transporte">Transport</string>
+    <string name="cat_lazer">Leisure</string>
+    <string name="cat_saude">Health</string>
+    <string name="cat_educacao">Education</string>
+    <string name="cat_moradia">Housing</string>
+    <string name="cat_outros">Others</string>
+    <string name="cat_salario">Salary</string>
+    <string name="cat_freelancer">Freelancer</string>
+    <string name="cat_aluguel">Rent</string>
+    <string name="cat_venda">Sale</string>
+    <string name="cat_devolucao">Refund</string>
 </resources>
