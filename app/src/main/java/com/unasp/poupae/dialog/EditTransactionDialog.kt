@@ -28,6 +28,8 @@ class EditTransactionDialog(
 
         val inputValor = view.findViewById<EditText>(R.id.inputValor)
         val inputDescricao = view.findViewById<EditText>(R.id.inputDescricao)
+        val inputNome = view.findViewById<EditText>(R.id.inputNome)
+        inputNome.setText(transacao.nome)
         val spinnerCategoria = view.findViewById<Spinner>(R.id.spinnerCategoria)
 
         val db = FirebaseFirestore.getInstance()
@@ -84,7 +86,10 @@ class EditTransactionDialog(
                 val descricao = inputDescricao.text.toString().trim()
 
                 if (categoria.isNotEmpty() && valor != null && userId != null) {
+                    val nome = inputNome.text.toString().trim()
+
                     val transacaoAtualizada = hashMapOf(
+                        "nome" to nome,
                         "categoria" to categoria,
                         "valor" to valor,
                         "descricao" to descricao,

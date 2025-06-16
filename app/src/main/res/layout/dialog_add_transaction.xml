@@ -22,12 +22,20 @@
         android:layout_marginTop="12dp" />
 
     <EditText
+        android:id="@+id/inputNome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nome da transação (ex: Netflix)"
+        android:inputType="textPersonName"
+        android:layout_marginTop="8dp"/>
+
+    <EditText
         android:id="@+id/inputValor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/valor"
         android:inputType="numberDecimal"
-        android:layout_marginTop="12dp" />
+        android:layout_marginTop="8dp" />
 
     <EditText
         android:id="@+id/inputDescricao"

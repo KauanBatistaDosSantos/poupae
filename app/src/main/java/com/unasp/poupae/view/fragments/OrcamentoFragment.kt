@@ -10,6 +10,8 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unasp.poupae.R
+import java.util.Calendar
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -144,14 +146,19 @@ class OrcamentoFragment : Fragment() {
     }
 
     private fun calcularSaldoReal(saldoRecorrente: Double, mapaPorCategoria: Map<String, Double>) {
-        val calendar = java.util.Calendar.getInstance()
-        calendar.set(java.util.Calendar.DAY_OF_MONTH, 1)
-        val inicioMesFormatado = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val dataInicioMes = calendar.time
 
         db.collection("users").document(userId!!)
             .collection("transacoes")
-            .whereGreaterThanOrEqualTo("data", inicioMesFormatado)
+            .whereGreaterThanOrEqualTo("data", com.google.firebase.Timestamp(dataInicioMes))
             .get()
+
             .addOnSuccessListener { transacoes ->
                 var saldoReal = saldoRecorrente
                 val gastosPorCategoria = mutableMapOf<String, Double>()

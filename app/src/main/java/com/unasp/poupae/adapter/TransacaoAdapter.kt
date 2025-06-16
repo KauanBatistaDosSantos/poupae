@@ -16,11 +16,12 @@ import com.unasp.poupae.model.Transacao
 class TransacaoAdapter(
     private val context: Context,
     private val lista: MutableList<Pair<String, Transacao>>,
-    private val onEditar: (String, Transacao) -> Unit
+    private val onEditar: (String, Transacao) -> Unit,
+    private val onTransacaoExcluida: () -> Unit
 ) : RecyclerView.Adapter<TransacaoAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val txtCategoria: TextView = view.findViewById(R.id.txtCategoria)
+        val txtNome: TextView = view.findViewById(R.id.txtNome)
         val txtValor: TextView = view.findViewById(R.id.txtValor)
         val txtData: TextView = view.findViewById(R.id.txtData)
     }
@@ -33,7 +34,7 @@ class TransacaoAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val (id, transacao) = lista[position]
-        holder.txtCategoria.text = transacao.categoria
+        holder.txtNome.text = transacao.nome
         holder.txtValor.text = "R$ %.2f".format(transacao.valor)
         holder.txtData.text = transacao.data?.toDate()?.let {
             java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
@@ -84,6 +85,8 @@ class TransacaoAdapter(
                             ).show()
                             lista.removeAt(position)
                             notifyItemRemoved(position)
+
+                            onTransacaoExcluida()
                         }
                 }
             }

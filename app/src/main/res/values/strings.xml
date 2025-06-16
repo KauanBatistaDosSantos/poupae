@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Poupaê</string>
+    <string name="app_name" translatable="false">Poupaê</string>
     <string name="default_web_client_id">SUA_CLIENT_ID_DO_FIREBASE_AQUI.apps.googleusercontent.com</string>
     <string name="navigation_drawer_open">Abrir menu</string>
     <string name="navigation_drawer_close">Fechar menu</string>

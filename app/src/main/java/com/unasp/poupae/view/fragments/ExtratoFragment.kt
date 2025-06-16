@@ -43,11 +43,18 @@ class ExtratoFragment : Fragment() {
 
         recyclerView = view.findViewById(R.id.recyclerExtrato)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = TransacaoAdapter(requireContext(), listaTransacoes) { id, transacao ->
-            EditTransactionDialog(id, transacao) {
-                carregarTransacoes()
-            }.show(parentFragmentManager, "editDialog")
-        }
+        adapter = TransacaoAdapter(
+            requireContext(),
+            listaTransacoes,
+            onEditar = { id, transacao ->
+                EditTransactionDialog(id, transacao) {
+                    carregarTransacoes()
+                }.show(parentFragmentManager, "editDialog")
+            },
+            onTransacaoExcluida = {
+                carregarTransacoes() // ← Isso recarrega tudo, inclusive o gráfico e o saldo real
+            }
+        )
         recyclerView.adapter = adapter
 
         barChart = view.findViewById(R.id.barChart)
@@ -84,7 +91,7 @@ class ExtratoFragment : Fragment() {
                         }
 
                         Transacao(
-                            categoria = doc.getString("categoria") ?: "",
+                            nome = doc.getString("nome") ?: "",
                             valor = doc.getDouble("valor") ?: 0.0,
                             tipo = doc.getString("tipo") ?: "",
                             data = parsedDate?.let { com.google.firebase.Timestamp(it) }

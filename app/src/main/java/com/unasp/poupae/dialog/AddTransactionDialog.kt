@@ -29,6 +29,8 @@ class AddTransactionDialog : DialogFragment() {
         val spinnerTipo = view.findViewById<Spinner>(R.id.spinnerTipo)
         val checkRecorrente = view.findViewById<CheckBox>(R.id.checkboxRecorrente)
 
+        val inputNome = view.findViewById<EditText>(R.id.inputNome)
+
         val db = FirebaseFirestore.getInstance()
         val userId = FirebaseAuth.getInstance().currentUser?.uid
 
@@ -126,6 +128,7 @@ class AddTransactionDialog : DialogFragment() {
                 dialog.setOnShowListener {
                     val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
                     button.setOnClickListener {
+                        val nome = inputNome.text.toString().trim()
                         val categoria = spinnerCategoria.selectedItem.toString()
                         val valor = inputValor.text.toString().toDoubleOrNull()
                         val descricao = inputDescricao.text.toString().trim()
@@ -135,16 +138,16 @@ class AddTransactionDialog : DialogFragment() {
                         if (valor != null && userId != null && categoria != "Selecione uma categoria" && categoria != "+ Adicionar nova categoria") {
                             if (tipo == "ganho" && categoria == "Salário") {
                                 verificarSalarioJaRegistrado(valor) {
-                                    salvarTransacao(userId, categoria, valor, descricao, tipo, recorrente)
+                                    salvarTransacao(userId, nome, categoria, valor, descricao, tipo, recorrente)
                                     dismiss() // Fecha só se confirmado
                                 }
                             } else if (tipo == "despesa") {
                                 registrarDespesaComValidacao(valor) {
-                                    salvarTransacao(userId, categoria, valor, descricao, tipo, recorrente)
+                                    salvarTransacao(userId, nome, categoria, valor, descricao, tipo, recorrente)
                                     dismiss()
                                 }
                             } else {
-                                salvarTransacao(userId, categoria, valor, descricao, tipo, recorrente)
+                                salvarTransacao(userId, nome, categoria, valor, descricao, tipo, recorrente)
                                 dismiss()
                             }
                         } else {
@@ -157,6 +160,7 @@ class AddTransactionDialog : DialogFragment() {
 
     private fun salvarTransacao(
         userId: String,
+        nome: String,
         categoria: String,
         valor: Double,
         descricao: String,
@@ -167,6 +171,7 @@ class AddTransactionDialog : DialogFragment() {
         val dataTimestamp = com.google.firebase.Timestamp.now() // Agora com precisão total
 
         val transacao = hashMapOf(
+            "nome" to nome,
             "categoria" to categoria,
             "valor" to valor,
             "descricao" to descricao,
