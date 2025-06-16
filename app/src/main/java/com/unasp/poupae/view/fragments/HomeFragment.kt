@@ -119,7 +119,7 @@ class HomeFragment : Fragment() {
                 }
 
                 val saldoAtual = totalGanhos - totalGastos
-                tvSaldoAtual.text = String.format("Saldo Atual: R$ %.2f", saldoAtual)
+                tvSaldoAtual.text = String.format("R$ %.2f", saldoAtual)
 
                 val total = mapa.values.sum()
                 val entradas = mapa.map { (categoria, valor) ->
@@ -144,6 +144,7 @@ class HomeFragment : Fragment() {
                 pieChart.description.isEnabled = false
                 pieChart.isDrawHoleEnabled = true
                 pieChart.setHoleColor(Color.TRANSPARENT)
+                pieChart.transparentCircleRadius = 0f
                 pieChart.setEntryLabelColor(Color.BLACK)
                 pieChart.setEntryLabelTextSize(12f)
                 pieChart.legend.orientation = Legend.LegendOrientation.VERTICAL

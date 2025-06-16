@@ -12,4 +12,8 @@
     <color name="azul_royal">#040585</color>
     <color name="linkColor">#1976D2</color>
     <color name="verde_principal">#008000</color>
+    <color name="amarelo">#F2B705</color>
+    <color name="verde_fundo">#CBDBFF</color>
+    <color name="categoria_padrao">#DBDBDB</color>         <!-- Netflix -->
+    <color name="categoria_lazer">#E0FBE3</color>          <!-- Spotify -->
 </resources>

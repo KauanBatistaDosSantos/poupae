@@ -4,23 +4,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <!-- Layout principal -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:fitsSystemWindows="true">
 
-        <!-- Toolbar com botão de menu -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:minHeight="72dp"
-            android:background="?attr/colorPrimary"
+            android:background="@color/azul_royal"
             app:title="Poupaê"
-            app:titleTextColor="@android:color/white" />
+            app:titleTextColor="@color/amarelo"
+            app:contentInsetStart="16dp" />
+
 
         <!-- Fragmentos -->
         <androidx.fragment.app.FragmentContainerView
@@ -45,6 +47,7 @@
     <!-- Menu lateral (Navigation Drawer) -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
+        android:paddingTop="15dp"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

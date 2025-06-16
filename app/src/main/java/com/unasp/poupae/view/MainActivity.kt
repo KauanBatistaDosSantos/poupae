@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.appcompat.widget.Toolbar
 import com.unasp.poupae.dialog.AddTransactionDialog
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.content.ContextCompat
 import com.unasp.poupae.view.fragments.*
 
 class MainActivity : AppCompatActivity() {
@@ -38,6 +39,8 @@ class MainActivity : AppCompatActivity() {
             R.string.navigation_drawer_open,
             R.string.navigation_drawer_close
         )
+
+        toggle.drawerArrowDrawable.color = ContextCompat.getColor(this, android.R.color.white)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 

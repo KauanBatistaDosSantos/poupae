@@ -3,21 +3,26 @@
 
     <item
         android:id="@+id/menu_home"
+        android:icon="@drawable/home"
         android:title="Início" />
 
     <item
         android:id="@+id/menu_extrato"
+        android:icon="@drawable/graph"
         android:title="Extrato" />
 
     <item
         android:id="@+id/menu_add"
+        android:icon="@drawable/add"
         android:title="Adicionar" />
 
     <item
         android:id="@+id/menu_metas"
+        android:icon="@drawable/saving"
         android:title="Metas" />
 
     <item
         android:id="@+id/menu_orcamento"
+        android:icon="@drawable/money"
         android:title="Orçamento" />
 </menu>

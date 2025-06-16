@@ -24,6 +24,7 @@ import com.unasp.poupae.dialog.EditTransactionDialog
 import com.unasp.poupae.model.Transacao
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import android.graphics.Color
 import java.util.*
 
 class ExtratoFragment : Fragment() {
@@ -127,9 +128,14 @@ class ExtratoFragment : Fragment() {
 
         val dataSetGanhos = BarDataSet(entriesGanhos, "Entradas").apply {
             color = ColorTemplate.MATERIAL_COLORS[0]
+            valueTextColor = Color.WHITE // ← muda a cor dos valores sobre as barras
+            valueTextSize = 12f          // (opcional) aumenta um pouco a fonte
         }
+
         val dataSetDespesas = BarDataSet(entriesDespesas, "Saídas").apply {
             color = ColorTemplate.MATERIAL_COLORS[1]
+            valueTextColor = Color.WHITE
+            valueTextSize = 12f
         }
 
         val data = BarData(dataSetGanhos, dataSetDespesas).apply {
@@ -150,11 +156,16 @@ class ExtratoFragment : Fragment() {
         }
 
         val formatoBrasileiro = object : ValueFormatter() {
-            private val formato = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+            private val formato = NumberFormat.getCurrencyInstance(Locale("pt", "BR")).apply {
+                maximumFractionDigits = 0
+                minimumFractionDigits = 0
+            }
+
             override fun getFormattedValue(value: Float): String {
                 return formato.format(value.toDouble())
             }
         }
+
 
         barChart.axisLeft.apply {
             axisMinimum = 0f
@@ -164,5 +175,46 @@ class ExtratoFragment : Fragment() {
         barChart.axisRight.isEnabled = false
         barChart.groupBars(-0.5f, 0.2f, 0.02f)
         barChart.invalidate()
+
+        // Fundo e área do gráfico brancos
+        barChart.setDrawGridBackground(false)
+        barChart.setDrawBarShadow(false)
+        barChart.setDrawBorders(false)
+        barChart.setNoDataTextColor(Color.WHITE)
+
+// Área de plotagem branca
+        barChart.setGridBackgroundColor(Color.WHITE)
+        barChart.legend.textColor = Color.WHITE
+        barChart.xAxis.textColor = Color.WHITE
+        barChart.axisLeft.textColor = Color.WHITE
+
+
+// Remove legenda interna do gráfico
+        barChart.legend.isEnabled = false
+
+// Eixo X (inferior)
+        barChart.xAxis.apply {
+            textColor = Color.WHITE
+            axisLineColor = Color.WHITE
+            gridColor = Color.WHITE
+            setDrawGridLines(false)
+            gridLineWidth = 2f // engrossa as linhas horizontais
+        }
+
+// Eixo Y (esquerda)
+        barChart.axisLeft.apply {
+            textColor = Color.WHITE
+            gridColor = Color.WHITE
+            axisLineColor = Color.WHITE
+            gridLineWidth = 2f // engrossa linhas horizontais
+            axisLineWidth = 2f // engrossa linha vertical esquerda
+            setDrawAxisLine(false) // ⬅ remove a linha vertical esquerda
+        }
+
+        barChart.axisLeft.valueFormatter = formatoBrasileiro
+
+// Eixo Y (direita já desativado)
+        barChart.axisRight.isEnabled = false
+
     }
 }
