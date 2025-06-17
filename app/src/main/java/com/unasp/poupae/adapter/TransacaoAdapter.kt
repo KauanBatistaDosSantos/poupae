@@ -36,6 +36,12 @@ class TransacaoAdapter(
         val (id, transacao) = lista[position]
         holder.txtNome.text = transacao.nome
         holder.txtValor.text = "R$ %.2f".format(transacao.valor)
+        val cor = if (transacao.tipo == "ganho") {
+            context.getColor(R.color.verde_sucesso) // Exemplo: defina esse verde no colors.xml
+        } else {
+            context.getColor(R.color.vermelho_erro) // Cor já usada no XML
+        }
+        holder.txtValor.setTextColor(cor)
         holder.txtData.text = transacao.data?.toDate()?.let {
             java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
         } ?: ""

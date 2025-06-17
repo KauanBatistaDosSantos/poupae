@@ -16,4 +16,7 @@
     <color name="verde_fundo">#CBDBFF</color>
     <color name="categoria_padrao">#DBDBDB</color>         <!-- Netflix -->
     <color name="categoria_lazer">#E0FBE3</color>          <!-- Spotify -->
+
+    <color name="verde_sucesso">#388E3C</color>
+    <color name="vermelho_erro">#D32F2F</color>
 </resources>
