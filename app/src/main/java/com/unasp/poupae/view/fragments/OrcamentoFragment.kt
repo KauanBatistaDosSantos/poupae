@@ -310,7 +310,6 @@ class OrcamentoFragment : Fragment() {
             }
     }
 
-
     private fun carregarOrcamentosCategoria() {
         if (userId == null || !isAdded || context == null) return
         val ctx = requireContext()
@@ -338,4 +337,8 @@ class OrcamentoFragment : Fragment() {
             }
     }
 
+    override fun onResume() {
+        super.onResume()
+        carregarOrcamento()
+    }
 }

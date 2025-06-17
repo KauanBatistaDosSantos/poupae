@@ -161,4 +161,9 @@ class HomeFragment : Fragment() {
                 pieChart.invalidate()
             }
     }
+
+    override fun onResume() {
+        super.onResume()
+        carregarDadosDoFirestore()
+    }
 }
