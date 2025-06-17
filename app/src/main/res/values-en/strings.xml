@@ -157,4 +157,6 @@
     <string name="cat_aluguel">Rent</string>
     <string name="cat_venda">Sale</string>
     <string name="cat_devolucao">Refund</string>
+
+    <string name="voltar">Back</string>
 </resources>

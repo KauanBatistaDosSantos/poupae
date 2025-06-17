@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import android.app.AlertDialog
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -44,6 +45,12 @@ class MetaDetalhesFragment : Fragment() {
         val btnExcluir = view.findViewById<Button>(R.id.btnExcluirMeta)
 
         val btnEditar = view.findViewById<Button>(R.id.btnEditarMeta)
+
+        val btnVoltar = view.findViewById<ImageButton>(R.id.btnVoltar)
+        btnVoltar.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
         btnEditar.setOnClickListener {
             mostrarDialogoEditarMeta()
         }

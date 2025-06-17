@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp">
@@ -9,14 +10,33 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/txtDetalheNome"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/nome_meta_detalhe"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="24dp">
+
+            <ImageButton
+                android:id="@+id/btnVoltar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/back"
+                android:backgroundTint="@color/white"
+                android:contentDescription="@string/voltar"
+                android:layout_alignParentStart="true"
+                app:tint="@color/azul_royal" />
+
+
+            <TextView
+                android:id="@+id/txtDetalheNome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:text="@string/nome_meta_detalhe"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_centerHorizontal="true"
+                android:layout_alignBaseline="@id/btnVoltar"/>
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/txtDetalheValorAlvo"
@@ -30,7 +50,7 @@
             android:id="@+id/txtDetalheValorAtual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/valor_alvo_detalhe"
+            android:text="@string/valor_atual_detalhe"
             android:textSize="16sp"
             android:layout_marginBottom="12dp" />
 
@@ -54,13 +74,13 @@
             android:id="@+id/btnEditarMeta"
             android:text="@string/editar_meta"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        
+            android:layout_height="wrap_content" />
+
         <Button
             android:id="@+id/btnExcluirMeta"
             android:text="@string/excluir_meta"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/btnAdicionarValor"
