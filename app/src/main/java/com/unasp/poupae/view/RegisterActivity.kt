@@ -2,24 +2,26 @@ package com.unasp.poupae.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import android.widget.*
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.google.firebase.auth.FirebaseAuth
+import androidx.lifecycle.ViewModelProvider
 import com.unasp.poupae.R
+import com.unasp.poupae.repository.AuthRepository
+import com.unasp.poupae.viewmodel.RegisterViewModel
+import com.unasp.poupae.viewmodel.RegisterViewModelFactory
 
 class RegisterActivity : AppCompatActivity() {
-    private lateinit var auth: FirebaseAuth
+
+    private lateinit var viewModel: RegisterViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
-        auth = FirebaseAuth.getInstance()
+        // ViewModel com factory
+        val factory = RegisterViewModelFactory(AuthRepository())
+        viewModel = ViewModelProvider(this, factory)[RegisterViewModel::class.java]
 
         val emailEditText = findViewById<EditText>(R.id.emailEditText)
         val passwordEditText = findViewById<EditText>(R.id.passwordEditText)
@@ -30,19 +32,19 @@ class RegisterActivity : AppCompatActivity() {
             val senha = passwordEditText.text.toString()
 
             if (email.isNotEmpty() && senha.length >= 6) {
-                auth.createUserWithEmailAndPassword(email, senha)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Toast.makeText(this, getString(R.string.conta_criada_sucesso), Toast.LENGTH_SHORT).show()
-                            startActivity(Intent(this, MainActivity::class.java))
-                            finish()
-                        } else {
-                            val erro = task.exception?.message ?: ""
-                            Toast.makeText(this, getString(R.string.erro_criar_conta, erro), Toast.LENGTH_LONG).show()
-                        }
-                    }
+                viewModel.registrarUsuario(email, senha)
             } else {
                 Toast.makeText(this, getString(R.string.erro_email_senha), Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.estadoRegistro.observe(this) { resultado ->
+            resultado.onSuccess {
+                Toast.makeText(this, getString(R.string.conta_criada_sucesso), Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            }.onFailure { e ->
+                Toast.makeText(this, getString(R.string.erro_criar_conta, e.message ?: ""), Toast.LENGTH_LONG).show()
             }
         }
     }

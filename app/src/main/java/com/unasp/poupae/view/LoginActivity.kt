@@ -11,9 +11,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.unasp.poupae.R
+import androidx.lifecycle.ViewModelProvider
+import com.unasp.poupae.repository.AuthRepository
+import com.unasp.poupae.viewmodel.LoginViewModelFactory
+import com.unasp.poupae.viewmodel.LoginViewModel
 
 class LoginActivity : AppCompatActivity() {
 
+    private lateinit var viewModel: LoginViewModel
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
 
@@ -39,6 +44,9 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val factory = LoginViewModelFactory(AuthRepository())
+        viewModel = ViewModelProvider(this, factory)[LoginViewModel::class.java]
 
         // ✅ Verifica se o usuário já está logado
         if (FirebaseAuth.getInstance().currentUser != null) {
@@ -72,19 +80,20 @@ class LoginActivity : AppCompatActivity() {
             val password = passwordEditText.text.toString()
 
             if (email.isNotEmpty() && password.isNotEmpty()) {
-                auth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            goToMain()
-                        } else {
-                            val erro = task.exception?.message ?: ""
-                            showToast(getString(R.string.erro_login_email, erro))
-                        }
-                    }
+                viewModel.fazerLogin(email, password)
             } else {
                 showToast(getString(R.string.preencha_campos))
             }
         }
+
+        viewModel.estadoLogin.observe(this) { resultado ->
+            resultado.onSuccess {
+                goToMain()
+            }.onFailure { e ->
+                showToast(getString(R.string.erro_login_email, e.message ?: ""))
+            }
+        }
+
 
         // Login com Google
         googleLoginButton.setOnClickListener {
