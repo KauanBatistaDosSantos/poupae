@@ -328,7 +328,38 @@ class AddTransactionDialog : DialogFragment() {
     }
 
     fun calcularSaldoRealDoUsuario(onResult: (Double) -> Unit) {
-        // TODO: Implemente ou chame a lógica real de cálculo do saldo
-        onResult(1000.0) // Substitua isso pela lógica real
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val calendarioInicio = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val dataInicio = calendarioInicio.time
+
+        db.collection("users").document(userId)
+            .collection("transacoes")
+            .whereGreaterThanOrEqualTo("data", dataInicio)
+            .get()
+            .addOnSuccessListener { result ->
+                var saldo = 0.0
+                for (doc in result) {
+                    val valor = doc.getDouble("valor") ?: continue
+                    val tipo = doc.getString("tipo") ?: continue
+
+                    if (tipo.lowercase(Locale.ROOT) == "ganho") {
+                        saldo += valor
+                    } else if (tipo.lowercase(Locale.ROOT) == "despesa") {
+                        saldo -= valor
+                    }
+                }
+                onResult(saldo)
+            }
+            .addOnFailureListener {
+                onResult(0.0)
+            }
     }
 }

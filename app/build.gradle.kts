@@ -72,4 +72,13 @@ dependencies {
     implementation(libs.mpandroidchart)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.fragment.ktx)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit.v115)
+    androidTestImplementation(libs.androidx.espresso.core.v351)
+    testImplementation(libs.mockito.core)
+
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.mockito.core.v520)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
