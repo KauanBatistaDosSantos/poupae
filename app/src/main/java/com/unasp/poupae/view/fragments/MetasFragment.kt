@@ -5,29 +5,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.unasp.poupae.repository.MetaRepository
 import com.unasp.poupae.R
 import com.unasp.poupae.adapter.MetaAdapter
+import android.widget.Toast
 import com.unasp.poupae.model.Meta
 import com.unasp.poupae.view.dialogs.AdicionarMetaDialogFragment
+import com.unasp.poupae.viewmodel.MetasViewModel
 
 class MetasFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: MetaAdapter
+    private lateinit var viewModel: MetasViewModel
     private val listaMetas = mutableListOf<Meta>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-
     ): View? {
         val view = inflater.inflate(R.layout.fragment_metas, container, false)
-        val btnAdicionarMeta  = view.findViewById<View>(R.id.btnAdicionarMeta )
+        val btnAdicionarMeta = view.findViewById<View>(R.id.btnAdicionarMeta)
 
         recyclerView = view.findViewById(R.id.recyclerMetas)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -38,35 +41,36 @@ class MetasFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
-
         recyclerView.adapter = adapter
 
-        carregarMetas()
+        val repository = MetaRepository()
+        viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return MetasViewModel(repository) as T
+            }
+        })[MetasViewModel::class.java]
 
-        btnAdicionarMeta .setOnClickListener {
+        observarViewModel()
+        viewModel.carregarMetas()
+
+        btnAdicionarMeta.setOnClickListener {
             AdicionarMetaDialogFragment {
-                carregarMetas()
+                viewModel.carregarMetas()
             }.show(childFragmentManager, "novaMeta")
         }
-
 
         return view
     }
 
-    private fun carregarMetas() {
-        val db = FirebaseFirestore.getInstance()
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    private fun observarViewModel() {
+        viewModel.metas.observe(viewLifecycleOwner) { novasMetas ->
+            listaMetas.clear()
+            listaMetas.addAll(novasMetas)
+            adapter.notifyDataSetChanged()
+        }
 
-        db.collection("users").document(userId)
-            .collection("metas")
-            .get()
-            .addOnSuccessListener { result ->
-                listaMetas.clear()
-                for (doc in result) {
-                    val meta = doc.toObject(Meta::class.java).copy(id = doc.id)
-                    listaMetas.add(meta)
-                }
-                adapter.notifyDataSetChanged()
-            }
+        viewModel.erro.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+        }
     }
 }

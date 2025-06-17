@@ -15,13 +15,16 @@ import android.app.AlertDialog
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import androidx.lifecycle.ViewModelProvider
+import com.unasp.poupae.repository.MetaRepository
+import com.unasp.poupae.viewmodel.MetaDetalhesViewModel
+import com.unasp.poupae.viewmodel.MetaDetalhesViewModelFactory
+import com.unasp.poupae.viewmodel.MetasViewModel
 
 class MetaDetalhesFragment : Fragment() {
 
     private lateinit var meta: Meta
-
+    private lateinit var viewModel: MetaDetalhesViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -32,6 +35,9 @@ class MetaDetalhesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_detalhes_meta, container, false)
+
+        val factory = MetaDetalhesViewModelFactory(MetaRepository())
+        viewModel = ViewModelProvider(this, factory)[MetaDetalhesViewModel::class.java]
 
         val txtNome = view.findViewById<TextView>(R.id.txtDetalheNome)
         val txtValorAlvo = view.findViewById<TextView>(R.id.txtDetalheValorAlvo)
@@ -89,10 +95,9 @@ class MetaDetalhesFragment : Fragment() {
             hint = getString(R.string.hint_valor)
         }
 
-        val titulo = if (adicionar)
-            getString(R.string.adicionar_valor_meta)
-        else
-            getString(R.string.retirar_valor_meta)
+        val titulo = if (adicionar) getString(R.string.adicionar_valor_meta)
+        else getString(R.string.retirar_valor_meta)
+
         val fator = if (adicionar) 1 else -1
 
         AlertDialog.Builder(context)
@@ -103,46 +108,23 @@ class MetaDetalhesFragment : Fragment() {
                 if (valor != null && valor > 0) {
                     val novoValor = meta.valorAtual + (valor * fator)
 
-                    val db = FirebaseFirestore.getInstance()
-                    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setPositiveButton
-
-                    db.collection("users").document(userId)
-                        .collection("metas").document(meta.id)
-                        .update("valorAtual", novoValor)
-                        .addOnSuccessListener {
+                    viewModel.atualizarValor(meta.id, meta.valorAtual, valor, adicionar) { sucesso ->
+                        if (sucesso) {
                             meta.valorAtual = novoValor
                             view?.findViewById<TextView>(R.id.txtDetalheValorAtual)?.text =
                                 "R$ %.2f".format(novoValor)
 
-                            // REGISTRA A TRANSAÇÃO
-                            val tipo = if (adicionar) "despesa" else "ganho"
-                            val data = com.google.firebase.Timestamp.now()
+                            viewModel.registrarTransacaoMeta(meta.nome, valor, adicionar)
 
-                            val transacao = hashMapOf(
-                                "categoria" to "[META] ${meta.nome}",
-                                "valor" to valor,
-                                "descricao" to if (adicionar) "Adicionado à meta" else "Retirado da meta",
-                                "tipo" to tipo,
-                                "data" to com.google.firebase.Timestamp.now(),
-                                "recorrente" to false,
-                                "tipoMeta" to true,
-                                "nome" to meta.nome
-                            )
-
-                            db.collection("users").document(userId)
-                                .collection("transacoes")
-                                .add(transacao)
-
-                            Toast.makeText(
-                                context,
-                                if (adicionar) getString(R.string.valor_adicionado) else getString(R.string.valor_retirado),
+                            Toast.makeText(context,
+                                if (adicionar) getString(R.string.valor_adicionado)
+                                else getString(R.string.valor_retirado),
                                 Toast.LENGTH_SHORT
                             ).show()
-
+                        } else {
+                            Toast.makeText(context, getString(R.string.erro_generico), Toast.LENGTH_SHORT).show()
                         }
-                        .addOnFailureListener {
-                            Toast.makeText(context, getString(R.string.erro_generico, it.message ?: ""), Toast.LENGTH_SHORT).show()
-                        }
+                    }
                 } else {
                     Toast.makeText(context, getString(R.string.valor_invalido), Toast.LENGTH_SHORT).show()
                 }
@@ -152,39 +134,15 @@ class MetaDetalhesFragment : Fragment() {
     }
 
     private fun excluirMeta() {
-        val db = FirebaseFirestore.getInstance()
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
-        val data = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val categoriaMeta = "[META] ${meta.nome}"
-
-        db.collection("users").document(userId)
-            .collection("transacoes")
-            .whereEqualTo("categoria", categoriaMeta)
-            .whereEqualTo("tipoMeta", true)
-            .get()
-            .addOnSuccessListener { transacoesDocs ->
-                val batch = db.batch()
-                for (doc in transacoesDocs) {
-                    batch.delete(doc.reference)
-                }
-                val metaRef = db.collection("users").document(userId)
-                    .collection("metas").document(meta.id)
-                batch.delete(metaRef)
-
-                batch.commit()
-                    .addOnSuccessListener {
-                        Toast.makeText(requireContext(), getString(R.string.meta_excluida_sucesso), Toast.LENGTH_SHORT).show()
-                        parentFragmentManager.popBackStack()
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(requireContext(), getString(R.string.erro_excluir_registros, it.message ?: ""), Toast.LENGTH_SHORT).show()
-                    }
+        viewModel.excluirMetaComTransacoes(meta.id, meta.nome) { sucesso ->
+            if (sucesso) {
+                Toast.makeText(requireContext(), getString(R.string.meta_excluida_sucesso), Toast.LENGTH_SHORT).show()
+                parentFragmentManager.popBackStack()
+                requireActivity().findViewById<View>(R.id.detailContainer)?.visibility = View.GONE
+            } else {
+                Toast.makeText(requireContext(), getString(R.string.erro_excluir_registros), Toast.LENGTH_SHORT).show()
             }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), getString(R.string.erro_buscar_registros, it.message ?: ""), Toast.LENGTH_SHORT).show()
-            }
-        requireActivity().findViewById<View>(R.id.detailContainer)?.visibility = View.GONE
+        }
     }
 
     private fun mostrarDialogoEditarMeta() {
@@ -207,28 +165,17 @@ class MetaDetalhesFragment : Fragment() {
                 val novoValorAlvo = edtValor.text.toString().toDoubleOrNull() ?: meta.valorAlvo
                 val novaData = edtData.text.toString()
 
-                val atualizacoes = mapOf(
-                    "nome" to novoNome,
-                    "valorAlvo" to novoValorAlvo,
-                    "dataLimite" to novaData
-                )
-
-                val db = FirebaseFirestore.getInstance()
-                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setPositiveButton
-
-                db.collection("users").document(userId)
-                    .collection("metas").document(meta.id)
-                    .update(atualizacoes)
-                    .addOnSuccessListener {
+                viewModel.atualizarMeta(meta.id, novoNome, novoValorAlvo, novaData) { sucesso ->
+                    if (sucesso) {
                         meta.nome = novoNome
                         meta.valorAlvo = novoValorAlvo
                         meta.dataLimite = novaData
                         atualizarTela()
                         Toast.makeText(context, getString(R.string.meta_atualizada), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, getString(R.string.erro_editar_meta), Toast.LENGTH_SHORT).show()
                     }
-                    .addOnFailureListener {
-                        Toast.makeText(context, getString(R.string.erro_editar_meta, it.message ?: ""), Toast.LENGTH_SHORT).show()
-                    }
+                }
             }
             .setNegativeButton(getString(R.string.cancelar), null)
             .show()

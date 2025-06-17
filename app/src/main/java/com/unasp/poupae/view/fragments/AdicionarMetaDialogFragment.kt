@@ -3,12 +3,18 @@ package com.unasp.poupae.view.dialogs
 import android.app.Dialog
 import android.os.Bundle
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unasp.poupae.R
 import com.unasp.poupae.model.Meta
+import com.unasp.poupae.repository.MetaRepository
+import com.unasp.poupae.viewmodel.MetasViewModel
+import com.unasp.poupae.viewmodel.MetasViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,8 +37,6 @@ class AdicionarMetaDialogFragment(
                 val valor = etValor.text.toString().toDoubleOrNull() ?: 0.0
                 val dataLimite = etData.text.toString().ifBlank { null }
                 val criadoEm = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setPositiveButton
-
                 val novaMeta = Meta(
                     nome = nome,
                     valorAlvo = valor,
@@ -40,14 +44,18 @@ class AdicionarMetaDialogFragment(
                     dataLimite = dataLimite,
                     criadoEm = criadoEm
                 )
+                val viewModel = ViewModelProvider(
+                    requireActivity(),
+                    MetasViewModelFactory(MetaRepository())
+                )[MetasViewModel::class.java]
 
-                FirebaseFirestore.getInstance()
-                    .collection("users").document(userId)
-                    .collection("metas")
-                    .add(novaMeta)
-                    .addOnSuccessListener {
+                viewModel.adicionarMeta(novaMeta) { sucesso ->
+                    if (sucesso) {
                         onMetaAdicionada()
+                    } else {
+                        Toast.makeText(requireContext(), "Erro ao salvar meta", Toast.LENGTH_SHORT).show()
                     }
+                }
             }
             .setNegativeButton(getString(R.string.cancelar), null)
             .create()

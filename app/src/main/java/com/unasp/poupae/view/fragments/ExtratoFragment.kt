@@ -1,11 +1,13 @@
 package com.unasp.poupae.view.fragments
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.charts.BarChart
@@ -16,15 +18,13 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.unasp.poupae.R
 import com.unasp.poupae.adapter.TransacaoAdapter
 import com.unasp.poupae.dialog.EditTransactionDialog
 import com.unasp.poupae.model.Transacao
+import com.unasp.poupae.repository.TransacaoRepository
+import com.unasp.poupae.viewmodel.ExtratoViewModel
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
-import android.graphics.Color
 import java.util.*
 
 class ExtratoFragment : Fragment() {
@@ -32,15 +32,16 @@ class ExtratoFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: TransacaoAdapter
     private lateinit var barChart: BarChart
+    private lateinit var viewModel: ExtratoViewModel
     private val listaTransacoes = mutableListOf<Pair<String, Transacao>>()
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_extrato, container, false)
 
+        // Setup gráfico e lista
+        barChart = view.findViewById(R.id.barChart)
         recyclerView = view.findViewById(R.id.recyclerExtrato)
         recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = TransacaoAdapter(
@@ -48,77 +49,52 @@ class ExtratoFragment : Fragment() {
             listaTransacoes,
             onEditar = { id, transacao ->
                 EditTransactionDialog(id, transacao) {
-                    carregarTransacoes()
+                    viewModel.carregarTransacoes()
                 }.show(parentFragmentManager, "editDialog")
             },
             onTransacaoExcluida = {
-                carregarTransacoes() // ← Isso recarrega tudo, inclusive o gráfico e o saldo real
+                viewModel.carregarTransacoes()
             }
         )
         recyclerView.adapter = adapter
 
-        barChart = view.findViewById(R.id.barChart)
+        // Setup ViewModel
+        val repository = TransacaoRepository()
+        viewModel = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return ExtratoViewModel(repository) as T
+            }
+        })[ExtratoViewModel::class.java]
 
-        carregarTransacoes()
+        observarViewModel()
+
+        viewModel.carregarTransacoes()
 
         return view
     }
 
-    private fun carregarTransacoes() {
-        val db = FirebaseFirestore.getInstance()
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    private fun observarViewModel() {
+        viewModel.transacoes.observe(viewLifecycleOwner) { lista ->
+            listaTransacoes.clear()
+            listaTransacoes.addAll(lista)
+            adapter.notifyDataSetChanged()
+        }
 
-        db.collection("users").document(userId)
-            .collection("transacoes")
-            .get()
-            .addOnSuccessListener { documentos ->
-                listaTransacoes.clear()
-
-                val ganhosPorMes = mutableMapOf<Int, Float>()
-                val despesasPorMes = mutableMapOf<Int, Float>()
-                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-                for (doc in documentos) {
-                    val transacao = try {
-                        doc.toObject(Transacao::class.java)
-                    } catch (e: Exception) {
-                        val dataString = doc.getString("data")
-                        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val parsedDate = try {
-                            dataString?.let { sdf.parse(it) }
-                        } catch (ex: Exception) {
-                            null
-                        }
-
-                        Transacao(
-                            nome = doc.getString("nome") ?: "",
-                            valor = doc.getDouble("valor") ?: 0.0,
-                            tipo = doc.getString("tipo") ?: "",
-                            data = parsedDate?.let { com.google.firebase.Timestamp(it) }
-                        )
-                    }
-                    listaTransacoes.add(Pair(doc.id, transacao))
-
-                    val data = transacao.data?.toDate() ?: continue
-                    val calendar = Calendar.getInstance().apply { time = data }
-                    val mes = calendar.get(Calendar.MONTH)
-                    val valor = transacao.valor.toFloat()
-
-                    if (transacao.tipo == "ganho") {
-                        ganhosPorMes[mes] = ganhosPorMes.getOrDefault(mes, 0f) + valor
-                    } else if (transacao.tipo == "despesa") {
-                        despesasPorMes[mes] = despesasPorMes.getOrDefault(mes, 0f) + valor
-                    }
-                }
-
-                listaTransacoes.sortByDescending { it.second.data?.toDate() }
-
-                gerarGrafico(ganhosPorMes, despesasPorMes)
-                adapter.notifyDataSetChanged()
+        viewModel.ganhosPorMes.observe(viewLifecycleOwner) { ganhos ->
+            viewModel.despesasPorMes.value?.let { despesas ->
+                gerarGrafico(ganhos, despesas)
             }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), getString(R.string.erro_carregar_transacoes), Toast.LENGTH_SHORT).show()
+        }
+
+        viewModel.despesasPorMes.observe(viewLifecycleOwner) { despesas ->
+            viewModel.ganhosPorMes.value?.let { ganhos ->
+                gerarGrafico(ganhos, despesas)
             }
+        }
+
+        viewModel.erro.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun gerarGrafico(ganhos: Map<Int, Float>, despesas: Map<Int, Float>) {
@@ -148,8 +124,8 @@ class ExtratoFragment : Fragment() {
 
         val dataSetGanhos = BarDataSet(entriesGanhos, getString(R.string.grafico_entradas)).apply {
             color = ColorTemplate.MATERIAL_COLORS[0]
-            valueTextColor = Color.WHITE // ← muda a cor dos valores sobre as barras
-            valueTextSize = 12f          // (opcional) aumenta um pouco a fonte
+            valueTextColor = Color.WHITE
+            valueTextSize = 12f
         }
 
         val dataSetDespesas = BarDataSet(entriesDespesas, getString(R.string.grafico_saidas)).apply {
@@ -160,19 +136,6 @@ class ExtratoFragment : Fragment() {
 
         val data = BarData(dataSetGanhos, dataSetDespesas).apply {
             barWidth = 0.4f
-        }
-
-        barChart.data = data
-        barChart.description.isEnabled = false
-        barChart.setFitBars(true)
-        barChart.xAxis.apply {
-            position = XAxis.XAxisPosition.BOTTOM
-            valueFormatter = IndexAxisValueFormatter(labelsVisiveis)
-            granularity = 1f
-            labelCount = labelsVisiveis.size
-            isGranularityEnabled = true
-            setDrawGridLines(false)
-            setAvoidFirstLastClipping(false)
         }
 
         val formatoBrasileiro = object : ValueFormatter() {
@@ -186,55 +149,43 @@ class ExtratoFragment : Fragment() {
             }
         }
 
-
-        barChart.axisLeft.apply {
-            axisMinimum = 0f
-            valueFormatter = formatoBrasileiro
-        }
-
-        barChart.axisRight.isEnabled = false
+        barChart.data = data
+        barChart.description.isEnabled = false
+        barChart.setFitBars(true)
         barChart.groupBars(-0.5f, 0.2f, 0.02f)
         barChart.invalidate()
-
-        // Fundo e área do gráfico brancos
         barChart.setDrawGridBackground(false)
         barChart.setDrawBarShadow(false)
         barChart.setDrawBorders(false)
         barChart.setNoDataTextColor(Color.WHITE)
-
-// Área de plotagem branca
         barChart.setGridBackgroundColor(Color.WHITE)
-        barChart.legend.textColor = Color.WHITE
-        barChart.xAxis.textColor = Color.WHITE
-        barChart.axisLeft.textColor = Color.WHITE
-
-
-// Remove legenda interna do gráfico
         barChart.legend.isEnabled = false
 
-// Eixo X (inferior)
         barChart.xAxis.apply {
-            textColor = Color.WHITE
-            axisLineColor = Color.WHITE
-            gridColor = Color.WHITE
+            position = XAxis.XAxisPosition.BOTTOM
+            valueFormatter = IndexAxisValueFormatter(labelsVisiveis)
+            granularity = 1f
+            labelCount = labelsVisiveis.size
+            isGranularityEnabled = true
             setDrawGridLines(false)
-            gridLineWidth = 2f // engrossa as linhas horizontais
+            setAvoidFirstLastClipping(false)
+            textColor = Color.WHITE
+            axisLineColor = Color.WHITE
+            gridColor = Color.WHITE
+            gridLineWidth = 2f
         }
 
-// Eixo Y (esquerda)
         barChart.axisLeft.apply {
+            axisMinimum = 0f
+            valueFormatter = formatoBrasileiro
             textColor = Color.WHITE
             gridColor = Color.WHITE
             axisLineColor = Color.WHITE
-            gridLineWidth = 2f // engrossa linhas horizontais
-            axisLineWidth = 2f // engrossa linha vertical esquerda
-            setDrawAxisLine(false) // ⬅ remove a linha vertical esquerda
+            gridLineWidth = 2f
+            axisLineWidth = 2f
+            setDrawAxisLine(false)
         }
 
-        barChart.axisLeft.valueFormatter = formatoBrasileiro
-
-// Eixo Y (direita já desativado)
         barChart.axisRight.isEnabled = false
-
     }
 }
