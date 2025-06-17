@@ -10,10 +10,8 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unasp.poupae.R
-import java.util.Calendar
-import com.google.firebase.Timestamp
-import java.text.SimpleDateFormat
-import java.util.Locale
+import androidx.fragment.app.viewModels
+import com.unasp.poupae.viewmodel.OrcamentoViewModel
 
 class OrcamentoFragment : Fragment() {
 
@@ -25,6 +23,7 @@ class OrcamentoFragment : Fragment() {
     private lateinit var btnAdicionarOrcamento: Button
     private val db = FirebaseFirestore.getInstance()
     private val userId = FirebaseAuth.getInstance().currentUser?.uid
+    private val viewModel: OrcamentoViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_orcamento, container, false)
@@ -36,7 +35,7 @@ class OrcamentoFragment : Fragment() {
         textSaldoReal = view.findViewById(R.id.textSaldoReal)
         btnAdicionarOrcamento = Button(requireContext()).apply {
             text = getString(R.string.definir_orcamento_categoria)
-            setOnClickListener { mostrarDialogoOrcamento() }
+            setOnClickListener { mostrarDialogoAdicionarOrcamentoCategoria() } // ✅
         }
 
         val btnAdicionar = view.findViewById<Button>(R.id.btnAdicionarOrcamentoCategoria)
@@ -44,190 +43,127 @@ class OrcamentoFragment : Fragment() {
             mostrarDialogoAdicionarOrcamentoCategoria()
         }
 
-        layoutPorCategoria.addView(btnAdicionarOrcamento)
-
-        carregarOrcamento()
-        carregarOrcamentosCategoria()
+        observarDados()
 
         return view
     }
 
-    private fun mostrarDialogoOrcamento() {
-        context?.let { ctx ->
-            val layout = LinearLayout(ctx).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(50, 20, 50, 10)
+    private fun observarDados() {
+        viewModel.orcamentosRecorrentes.observe(viewLifecycleOwner) { orcamentos ->
+            exibirOrcamentosRecorrentes(orcamentos)
+            viewModel.carregarTransacoesDesdeInicioDoMes()
+        }
+
+        viewModel.transacoesDoMes.observe(viewLifecycleOwner) { transacoes ->
+            val saldoRecorrente = calcularSaldoRecorrente(viewModel.orcamentosRecorrentes.value ?: emptyList())
+            exibirSaldoReal(saldoRecorrente, transacoes)
+        }
+
+        viewModel.orcamentosCategoria.observe(viewLifecycleOwner) { orcamentos ->
+            exibirOrcamentosCategoria(orcamentos)
+        }
+
+        viewModel.erro.observe(viewLifecycleOwner) { erro ->
+            erro?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                viewModel.limparErro()
             }
+        }
 
-            val inputCategoria = EditText(ctx).apply {
-                hint = getString(R.string.hint_categoria)
+        viewModel.carregarOrcamentosRecorrentes()
+        viewModel.carregarOrcamentosCategoria()
+    }
+
+    private fun exibirOrcamentosRecorrentes(lista: List<Map<String, Any>>) {
+        layoutGanhos.removeAllViews()
+        layoutDespesas.removeAllViews()
+        layoutPorCategoria.removeAllViews()
+        if (layoutPorCategoria.indexOfChild(btnAdicionarOrcamento) == -1) {
+            layoutPorCategoria.addView(btnAdicionarOrcamento)
+        }
+        for (orc in lista) {
+            val tipo = orc["tipo"] as? String ?: continue
+            val valor = orc["valor"] as? Double ?: continue
+            val categoria = orc["categoria"] as? String ?: getString(R.string.hint_categoria)
+            val descricao = orc["descricao"] as? String ?: ""
+
+            val itemView = TextView(requireContext())
+            itemView.text = "$categoria - R$ %.2f".format(valor) +
+                    if (descricao.isNotBlank()) " ($descricao)" else ""
+            itemView.textSize = 14f
+
+            if (tipo == "ganho") {
+                layoutGanhos.addView(itemView)
+            } else {
+                layoutDespesas.addView(itemView)
             }
-            val inputValor = EditText(ctx).apply {
-                hint = getString(R.string.hint_valor)
-                inputType =
-                    android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+        }
+
+        val saldo = calcularSaldoRecorrente(lista)
+        textSaldoRecorrente.text = getString(R.string.saldo_recorrente, saldo)
+    }
+
+    private fun calcularSaldoRecorrente(lista: List<Map<String, Any>>): Double {
+        var ganhos = 0.0
+        var despesas = 0.0
+        for (orc in lista) {
+            val tipo = orc["tipo"] as? String ?: continue
+            val valor = orc["valor"] as? Double ?: continue
+            if (tipo == "ganho") ganhos += valor else despesas += valor
+        }
+        return ganhos - despesas
+    }
+
+    private fun exibirSaldoReal(saldoRecorrente: Double, transacoes: List<Map<String, Any>>) {
+        var saldoReal = saldoRecorrente
+        val gastos = mutableMapOf<String, Double>()
+
+        for (t in transacoes) {
+            val tipo = t["tipo"] as? String ?: continue
+            val valor = t["valor"] as? Double ?: continue
+            val categoria = t["categoria"] as? String ?: getString(R.string.categoria)
+            if (tipo == "despesa") {
+                saldoReal -= valor
+                gastos[categoria] = gastos.getOrDefault(categoria, 0.0) + valor
             }
+        }
 
-            layout.addView(inputCategoria)
-            layout.addView(inputValor)
+        textSaldoReal.text = getString(R.string.saldo_real, saldoReal)
 
-            AlertDialog.Builder(ctx)
-                .setTitle(getString(R.string.titulo_novo_orcamento_categoria))
-                .setView(layout)
-                .setPositiveButton(getString(R.string.salvar)) { _, _ ->
-                    val categoria = inputCategoria.text.toString().trim()
-                    val valor = inputValor.text.toString().toDoubleOrNull() ?: 0.0
+        viewModel.orcamentosCategoria.value?.let { categorias ->
+            layoutPorCategoria.addView(TextView(requireContext()).apply {
+                text = getString(R.string.acompanhamento_titulo)
+                textSize = 14f
+            })
 
-                    if (categoria.isNotEmpty() && userId != null) {
-                        val orcamentoData = hashMapOf(
-                            "categoria" to categoria,
-                            "valorLimite" to valor
-                        )
-                        db.collection("users").document(userId)
-                            .collection("orcamento_categoria")
-                            .document(categoria)
-                            .set(orcamentoData)
-                            .addOnSuccessListener {
-                                Toast.makeText(
-                                    ctx,
-                                    getString(R.string.orcamento_salvo),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                carregarOrcamento()
-                            }
-                            .addOnFailureListener {
-                                Toast.makeText(
-                                    ctx,
-                                    getString(R.string.erro_salvar_orcamento),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                    }
-                }
-                .setNegativeButton(getString(R.string.cancelar), null)
-                .show()
+            for (orc in categorias) {
+                val categoria = orc["categoria"] as? String ?: continue
+                val limite = orc["valorLimite"] as? Double ?: continue
+                val gasto = gastos[categoria] ?: 0.0
+                val status = if (gasto <= limite)
+                    getString(R.string.dentro_orcamento)
+                else
+                    getString(R.string.fora_orcamento)
+
+                val resumo = TextView(requireContext())
+                resumo.text = "$categoria: ${getString(R.string.gasto)} R$ %.2f / ${getString(R.string.limite)} R$ %.2f - $status"
+                    .format(gasto, limite)
+                resumo.textSize = 14f
+                layoutPorCategoria.addView(resumo)
+            }
         }
     }
 
-    private fun carregarOrcamento() {
-        if (userId == null || !isAdded || context == null) return
-
-        db.collection("users").document(userId)
-            .collection("orcamento_recorrente")
-            .get()
-            .addOnSuccessListener { docs ->
-                if (!isAdded || context == null) return@addOnSuccessListener
-                val ctx = requireContext()
-
-                var totalGanhos = 0.0
-                var totalDespesas = 0.0
-                val mapaPorCategoria = mutableMapOf<String, Double>()
-
-                layoutGanhos.removeAllViews()
-                layoutDespesas.removeAllViews()
-                layoutPorCategoria.removeAllViews()
-                layoutPorCategoria.addView(btnAdicionarOrcamento)
-
-                for (doc in docs) {
-                    val tipo = doc.getString("tipo") ?: continue
-                    val valor = doc.getDouble("valor") ?: 0.0
-                    val categoria = doc.getString("categoria") ?: ctx.getString(R.string.hint_categoria)
-                    val descricao = doc.getString("descricao") ?: ""
-
-                    val itemView = TextView(ctx)
-                    itemView.text = "$categoria - R$ %.2f".format(valor) +
-                            if (descricao.isNotBlank()) " ($descricao)" else ""
-                    itemView.textSize = 14f
-
-                    mapaPorCategoria[categoria] = mapaPorCategoria.getOrDefault(categoria, 0.0) + valor
-
-                    if (tipo == "ganho") {
-                        totalGanhos += valor
-                        layoutGanhos.addView(itemView)
-                    } else {
-                        totalDespesas += valor
-                        layoutDespesas.addView(itemView)
-                    }
-                }
-
-                val saldoRecorrente = totalGanhos - totalDespesas
-                textSaldoRecorrente.text = ctx.getString(R.string.saldo_recorrente, saldoRecorrente)
-
-                calcularSaldoReal(saldoRecorrente, mapaPorCategoria)
-            }
-            .addOnFailureListener {
-                if (!isAdded || context == null) return@addOnFailureListener
-                Toast.makeText(requireContext(), getString(R.string.erro_carregar_orcamento, it.message ?: ""), Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun calcularSaldoReal(saldoRecorrente: Double, mapaPorCategoria: Map<String, Double>) {
-        if (!isAdded || context == null || userId == null) return
-        val ctx = requireContext()
-
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_MONTH, 1)
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        val dataInicioMes = calendar.time
-
-        db.collection("users").document(userId)
-            .collection("transacoes")
-            .whereGreaterThanOrEqualTo("data", Timestamp(dataInicioMes))
-            .get()
-            .addOnSuccessListener { transacoes ->
-                if (!isAdded || context == null) return@addOnSuccessListener
-
-                var saldoReal = saldoRecorrente
-                val gastosPorCategoria = mutableMapOf<String, Double>()
-
-                for (transacao in transacoes) {
-                    val tipo = transacao.getString("tipo") ?: continue
-                    val valor = transacao.getDouble("valor") ?: continue
-                    val categoria = transacao.getString("categoria") ?: ctx.getString(R.string.categoria)
-
-                    if (tipo == "despesa") {
-                        saldoReal -= valor
-                        gastosPorCategoria[categoria] = gastosPorCategoria.getOrDefault(categoria, 0.0) + valor
-                    }
-                }
-
-                textSaldoReal.text = ctx.getString(R.string.saldo_real, saldoReal)
-
-                db.collection("users").document(userId)
-                    .collection("orcamento_categoria")
-                    .get()
-                    .addOnSuccessListener { orcamentosCategoria ->
-                        if (!isAdded || context == null) return@addOnSuccessListener
-
-                        layoutPorCategoria.addView(TextView(ctx).apply {
-                            text = ctx.getString(R.string.acompanhamento_titulo)
-                            textSize = 14f
-                        })
-
-                        for (orc in orcamentosCategoria) {
-                            val categoria = orc.getString("categoria") ?: continue
-                            val limite = orc.getDouble("valorLimite") ?: 0.0
-                            val gasto = gastosPorCategoria[categoria] ?: 0.0
-                            val status = if (gasto <= limite)
-                                ctx.getString(R.string.dentro_orcamento)
-                            else
-                                ctx.getString(R.string.fora_orcamento)
-
-                            val resumo = TextView(ctx)
-                            resumo.text = "$categoria: ${ctx.getString(R.string.gasto)} R$ %.2f / ${ctx.getString(R.string.limite)} R$ %.2f - $status"
-                                .format(gasto, limite)
-                            resumo.textSize = 14f
-                            layoutPorCategoria.addView(resumo)
-                        }
-                    }
-            }
-            .addOnFailureListener {
-                if (!isAdded || context == null) return@addOnFailureListener
-                Toast.makeText(ctx, ctx.getString(R.string.erro_calcular_saldo_real, it.message ?: ""), Toast.LENGTH_SHORT).show()
-            }
+    private fun exibirOrcamentosCategoria(lista: List<Map<String, Any>>) {
+        layoutPorCategoria.removeAllViews()
+        for (orc in lista) {
+            val categoria = orc["categoria"] as? String ?: continue
+            val valor = orc["valorLimite"] as? Double ?: continue
+            val view = TextView(requireContext())
+            view.text = "$categoria - ${getString(R.string.valor_limite)} R$ %.2f".format(valor)
+            view.textSize = 14f
+            layoutPorCategoria.addView(view)
+        }
     }
 
     private fun mostrarDialogoAdicionarOrcamentoCategoria() {
@@ -239,106 +175,51 @@ class OrcamentoFragment : Fragment() {
         val spinnerCategoria = dialogView.findViewById<Spinner>(R.id.spinnerCategoria)
         val editValor = dialogView.findViewById<EditText>(R.id.editValor)
 
-        if (spinnerCategoria == null || editValor == null) {
-            Toast.makeText(ctx, ctx.getString(R.string.erro_layout_dialogo), Toast.LENGTH_SHORT).show()
-            return
-        }
-
+        // 🟡 Carrega categorias únicas a partir das transações salvas
         db.collection("users").document(userId)
             .collection("transacoes")
             .get()
             .addOnSuccessListener { docs ->
-                if (!isAdded || context == null) return@addOnSuccessListener
-
                 val categorias = docs.mapNotNull { it.getString("categoria") }
                     .toSet()
                     .sorted()
 
                 if (categorias.isEmpty()) {
-                    Toast.makeText(ctx, ctx.getString(R.string.nenhuma_categoria), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(ctx, getString(R.string.nenhuma_categoria), Toast.LENGTH_SHORT).show()
                     return@addOnSuccessListener
                 }
 
+                // 🟢 Preenche o spinner com as categorias encontradas
                 val adapter = ArrayAdapter(ctx, android.R.layout.simple_spinner_item, categorias)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 spinnerCategoria.adapter = adapter
 
+                // Exibe o AlertDialog normalmente
                 AlertDialog.Builder(ctx)
-                    .setTitle(ctx.getString(R.string.titulo_novo_orcamento_dialogo))
+                    .setTitle(getString(R.string.titulo_novo_orcamento_categoria))
                     .setView(dialogView)
-                    .setPositiveButton(ctx.getString(R.string.salvar)) { _, _ ->
+                    .setPositiveButton(getString(R.string.salvar)) { _, _ ->
                         val categoria = spinnerCategoria.selectedItem?.toString()?.trim() ?: return@setPositiveButton
-                        val valorStr = editValor.text.toString().replace(",", ".")
-                        val valor = valorStr.toDoubleOrNull()
+                        val valor = editValor.text.toString().toDoubleOrNull() ?: return@setPositiveButton
 
-                        if (valor != null) {
-                            salvarOrcamentoCategoria(categoria, valor)
-                        } else {
-                            Toast.makeText(ctx, ctx.getString(R.string.erro_valor), Toast.LENGTH_SHORT).show()
+                        viewModel.salvarOrcamentoCategoria(categoria, valor) { sucesso ->
+                            if (sucesso) {
+                                Toast.makeText(ctx, getString(R.string.orcamento_salvo), Toast.LENGTH_SHORT).show()
+                                viewModel.carregarOrcamentosCategoria()
+                            } else {
+                                Toast.makeText(ctx, getString(R.string.erro_salvar_generico), Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
-                    .setNegativeButton(ctx.getString(R.string.cancelar), null)
+                    .setNegativeButton(getString(R.string.cancelar), null)
                     .show()
             }
             .addOnFailureListener {
-                if (!isAdded || context == null) return@addOnFailureListener
-                Toast.makeText(ctx, ctx.getString(R.string.erro_buscar_categorias, it.message ?: ""), Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun salvarOrcamentoCategoria(categoria: String, valor: Double) {
-        if (!isAdded || context == null || userId == null) return
-        val ctx = requireContext()
-
-        val dados = mapOf(
-            "categoria" to categoria.replaceFirstChar { it.uppercaseChar() },
-            "valorLimite" to valor
-        )
-
-        db.collection("users").document(userId)
-            .collection("orcamento_categoria")
-            .document(categoria.lowercase()) // ID = nome da categoria em minúsculo
-            .set(dados)
-            .addOnSuccessListener {
-                if (!isAdded || context == null) return@addOnSuccessListener
-                Toast.makeText(ctx, ctx.getString(R.string.orcamento_salvo), Toast.LENGTH_SHORT).show()
-                carregarOrcamentosCategoria() // Atualiza visualmente
-            }
-            .addOnFailureListener {
-                if (!isAdded || context == null) return@addOnFailureListener
-                Toast.makeText(ctx, ctx.getString(R.string.erro_salvar_generico, it.message ?: ""), Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun carregarOrcamentosCategoria() {
-        if (userId == null || !isAdded || context == null) return
-        val ctx = requireContext()
-
-        db.collection("users").document(userId)
-            .collection("orcamento_categoria")
-            .get()
-            .addOnSuccessListener { documentos ->
-                if (!isAdded || context == null) return@addOnSuccessListener
-                layoutPorCategoria.removeAllViews()
-
-                for (doc in documentos) {
-                    val categoria = doc.getString("categoria") ?: continue
-                    val valor = doc.getDouble("valorLimite") ?: continue
-
-                    val view = TextView(ctx)
-                    view.text = "$categoria - ${ctx.getString(R.string.valor_limite)} R$ %.2f".format(valor)
-                    view.textSize = 14f
-                    layoutPorCategoria.addView(view)
-                }
-            }
-            .addOnFailureListener {
-                if (!isAdded || context == null) return@addOnFailureListener
-                Toast.makeText(ctx, ctx.getString(R.string.erro_buscar_categorias, it.message ?: ""), Toast.LENGTH_SHORT).show()
+                Toast.makeText(ctx, getString(R.string.erro_buscar_categorias), Toast.LENGTH_SHORT).show()
             }
     }
 
     override fun onResume() {
         super.onResume()
-        carregarOrcamento()
     }
 }

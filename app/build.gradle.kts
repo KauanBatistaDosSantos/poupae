@@ -71,4 +71,5 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.mpandroidchart)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.fragment.ktx)
 }
