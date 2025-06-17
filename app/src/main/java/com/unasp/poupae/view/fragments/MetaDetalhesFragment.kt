@@ -116,15 +116,17 @@ class MetaDetalhesFragment : Fragment() {
 
                             // REGISTRA A TRANSAÇÃO
                             val tipo = if (adicionar) "despesa" else "ganho"
-                            val data = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                            val data = com.google.firebase.Timestamp.now()
 
                             val transacao = hashMapOf(
                                 "categoria" to "[META] ${meta.nome}",
                                 "valor" to valor,
                                 "descricao" to if (adicionar) "Adicionado à meta" else "Retirado da meta",
                                 "tipo" to tipo,
-                                "data" to data,
-                                "recorrente" to false
+                                "data" to com.google.firebase.Timestamp.now(),
+                                "recorrente" to false,
+                                "tipoMeta" to true,
+                                "nome" to meta.nome
                             )
 
                             db.collection("users").document(userId)
