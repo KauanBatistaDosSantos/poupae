@@ -34,7 +34,7 @@ class TransacaoAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val (id, transacao) = lista[position]
-        holder.txtNome.text = transacao.nome
+        holder.txtNome.text = if (transacao.tipoMeta) transacao.categoria else transacao.nome
         holder.txtValor.text = "R$ %.2f".format(transacao.valor)
         val cor = if (transacao.tipo == "ganho") {
             context.getColor(R.color.verde_sucesso) // Exemplo: defina esse verde no colors.xml
@@ -97,8 +97,6 @@ class TransacaoAdapter(
                 }
             }
     }
-
-
 
     fun atualizarLista(novaLista: List<Pair<String, Transacao>>) {
         lista.clear()
