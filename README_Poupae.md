@@ -65,7 +65,12 @@ git clone https://github.com/seuusuario/poupae.git
 
 ## 📌 Autores
 
-- Desenvolvido por Kauan Batista dos Santos (@seuusuario)
+- Desenvolvido por:
+- Kauan Batista dos Santos
+- Gustavo Silva Sobrinho
+- Vitor Alvares Schneiker dos Santos
+- Gustavo Ferreira Morinico
+- João Gabriel Santos Mizael
 
 ---
 
