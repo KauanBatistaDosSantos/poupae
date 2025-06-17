@@ -9,7 +9,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import com.unasp.poupae.R
 import android.content.Intent
-import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import androidx.appcompat.widget.Toolbar
 import com.unasp.poupae.dialog.AddTransactionDialog
@@ -17,6 +16,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.content.ContextCompat
 import com.unasp.poupae.view.fragments.*
+import androidx.core.content.edit
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +25,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var toolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val prefs = getSharedPreferences("config", MODE_PRIVATE)
+        val idiomaSalvo = prefs.getString("idioma", "en") ?: "en"
+        setAppLocale(this, idiomaSalvo)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -59,6 +63,11 @@ class MainActivity : AppCompatActivity() {
                         .setTitle(getString(R.string.escolha_idioma))
                         .setItems(idiomas) { _, which ->
                             val language = codigos[which]
+
+                            prefs.edit { putString("idioma", language) }
+                            setAppLocale(this, language)
+                            recreate()
+
                             setAppLocale(this, language)
                             recreate() // reinicia a activity para aplicar o idioma
                         }
