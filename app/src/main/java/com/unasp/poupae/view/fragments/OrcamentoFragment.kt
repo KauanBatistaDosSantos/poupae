@@ -33,10 +33,6 @@ class OrcamentoFragment : Fragment() {
         layoutPorCategoria = view.findViewById(R.id.layoutPorCategoria)
         textSaldoRecorrente = view.findViewById(R.id.textSaldoRecorrente)
         textSaldoReal = view.findViewById(R.id.textSaldoReal)
-        btnAdicionarOrcamento = Button(requireContext()).apply {
-            text = getString(R.string.definir_orcamento_categoria)
-            setOnClickListener { mostrarDialogoAdicionarOrcamentoCategoria() } // ✅
-        }
 
         val btnAdicionar = view.findViewById<Button>(R.id.btnAdicionarOrcamentoCategoria)
         btnAdicionar.setOnClickListener {
@@ -78,9 +74,6 @@ class OrcamentoFragment : Fragment() {
         layoutGanhos.removeAllViews()
         layoutDespesas.removeAllViews()
         layoutPorCategoria.removeAllViews()
-        if (layoutPorCategoria.indexOfChild(btnAdicionarOrcamento) == -1) {
-            layoutPorCategoria.addView(btnAdicionarOrcamento)
-        }
         for (orc in lista) {
             val tipo = orc["tipo"] as? String ?: continue
             val valor = orc["valor"] as? Double ?: continue
